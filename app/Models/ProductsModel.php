@@ -51,4 +51,8 @@ class ProductsModel extends Model {
     public function branchOffices() {
         return $this->belongsToMany(BranchOfficesModel::class, 'ProductBranchOffice', 'Product', 'BranchOffice')->withPivot('Product', 'BranchOffice');
     }
+
+    public function quotes() {
+        return $this->belongsToMany(QuotationsModel::class, 'QuoteDetails', 'Product', 'Quotation')->withPivot('Quotation', 'Product');
+    }
 }

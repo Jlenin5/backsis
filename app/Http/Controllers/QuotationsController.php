@@ -7,16 +7,24 @@ use Illuminate\Http\Request;
 
 class QuotationsController extends Controller {
     public function index() {
-        $qt = QuotationsModel::get();
+        $qt = QuotationsModel::with('serialNumber','currencies','companies','clients','employees')->get();
+        $qt->each(function ($quote) {
+            $quote->products->each(function ($product) {
+                unset($product->pivot);
+            });
+        });
         return $qt;
     }
 
     public function getId($id) {
-        $qt = QuotationsModel::find($id);
+        $qt = QuotationsModel::with('serialNumber','currencies','companies','clients','employees')->findOrFail($id);
+        $qt->products->each(function ($product) {
+            unset($product->pivot);
+        });
         if (!$qt) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
-        return [$qt];
+        return $qt;
     }
 
     public function store(Request $request) {
