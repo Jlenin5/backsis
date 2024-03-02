@@ -24,8 +24,8 @@ class EmployeeModel extends Model {
         'empCreatedAt',
         'empUpdatedAt',
     ];
-
+ 
     public function documentType() {
-        return $this->belongsTo(DocumentTypesModel::class, 'DocumentTypeId');
+        return $this->belongsTo(DocumentTypesModel::class, 'DocumentType', 'id');
     }
 }

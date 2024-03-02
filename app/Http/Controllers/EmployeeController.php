@@ -8,12 +8,12 @@ use Illuminate\Http\Request;
 class EmployeeController extends Controller {
 
     public function index() {
-        $emp = EmployeeModel::get();
+        $emp = EmployeeModel::with('documentType')->get();
         return $emp;
     }
 
     public function getId($id) {
-        $emp = EmployeeModel::find($id);
+        $emp = EmployeeModel::with('documentType')->find($id);
         if (!$emp) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
