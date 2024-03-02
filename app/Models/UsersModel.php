@@ -25,11 +25,23 @@ class UsersModel extends Model {
         'userUpdatedAt',
     ];
 
-    public function humanResources() {
-        return $this->belongsTo(EmployeeModel::class, 'Employee');
+    public function employees() {
+        return $this->belongsTo(EmployeeModel::class, 'Employee', 'id');
     }
     
+    public function avatars() {
+        return $this->belongsTo(AvatarsModel::class, 'Avatar', 'id');
+    }
+
+    public function workAreas() {
+        return $this->belongsTo(WorkAreaModel::class, 'WorkArea', 'id');
+    }
+    
+    public function jobPositions() {
+        return $this->belongsTo(JobPositionModel::class, 'JobPosition', 'id');
+    }
+
     public function roles() {
-        return $this->belongsTo(RolesModel::class, 'Rol');
+        return $this->belongsTo(RolesModel::class, 'Rol', 'id');
     }
 }

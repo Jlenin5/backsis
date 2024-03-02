@@ -8,12 +8,12 @@ use Illuminate\Http\Request;
 class UsersController extends Controller {
     
     public function index() {
-        $user = UsersModel::get();
+        $user = UsersModel::with('employees','avatars','workAreas','jobPositions','roles')->get();
         return $user;
     }
 
     public function getId($id) {
-        $user = UsersModel::find($id);
+        $user = UsersModel::with('employees','avatars','workAreas','jobPositions','roles')->find($id);
         if (!$user) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
