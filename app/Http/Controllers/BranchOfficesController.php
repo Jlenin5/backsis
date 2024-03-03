@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 class BranchOfficesController extends Controller {
     public function index() {
-        $bo = BranchOfficesModel::get();
+        $bo = BranchOfficesModel::with('users','districts')->get();
         return $bo;
     }
 
     public function getId($id) {
-        $bo = BranchOfficesModel::find($id);
+        $bo = BranchOfficesModel::with('users','districts')->find($id);
         if (!$bo) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }

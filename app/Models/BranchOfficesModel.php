@@ -27,4 +27,13 @@ class BranchOfficesModel extends Model {
     public function products() {
         return $this->belongsToMany(ProductsModel::class, 'ProductBranchOffice', 'BranchOffice', 'Product')->withPivot('Product', 'BranchOffice');
     }
+
+    public function users() {
+        return $this->belongsTo(UsersModel::class, 'User', 'id')->with('employees');
+    }
+
+    public function districts() {
+        return $this->belongsTo(DistrictsModel::class, 'District', 'id');
+    }
+
 }
