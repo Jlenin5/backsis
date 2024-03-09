@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\UsersModel;
 use Illuminate\Http\Request;
+use Ramsey\Uuid\Uuid;
 
 class UsersController extends Controller {
     
     public function index() {
-        $user = UsersModel::with('employees','avatars','workAreas','jobPositions','roles')->get();
+        $user = UsersModel::with('employees','roles')->where('deleted_at',null)->get();
         return $user;
     }
 
     public function getId($id) {
-        $user = UsersModel::with('employees','avatars','workAreas','jobPositions','roles')->find($id);
+        $user = UsersModel::with('employees','roles')->where('deleted_at',null)->find($id);
         if (!$user) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -21,19 +22,15 @@ class UsersController extends Controller {
     }
 
     public function store(Request $request) {
+        $uuid = Uuid::uuid4();
         $data = $request->json()->all();
         $user = new UsersModel;
         $user->id = $data['id'];
         $user->Employee = $data['Employee'];
-        $user->Avatar = $data['Avatar'];
-        $user->WorkArea = $data['WorkArea'];
-        $user->JobPosition = $data['JobPosition'];
         $user->userDisplayName = $data['userDisplayName'];
         $user->userPassword = $data['userPassword'];
         $user->Rol = $data['Rol'];
-        $user->uuid = $data['uuid'];
-        $user->userCreatedAt = $data['userCreatedAt'];
-        $user->userUpdatedAt = $data['userUpdatedAt'];
+        $user->uuid = $uuid->toString();
         $user->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -46,15 +43,10 @@ class UsersController extends Controller {
         $data = $request->json()->all();
         $user = UsersModel::find($id);
         $user->Employee = $data['Employee'];
-        $user->Avatar = $data['Avatar'];
-        $user->WorkArea = $data['WorkArea'];
-        $user->JobPosition = $data['JobPosition'];
         $user->userDisplayName = $data['userDisplayName'];
         $user->userPassword = $data['userPassword'];
         $user->Rol = $data['Rol'];
         $user->uuid = $data['uuid'];
-        $user->userCreatedAt = $data['userCreatedAt'];
-        $user->userUpdatedAt = $data['userUpdatedAt'];
         $user->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
@@ -64,7 +56,8 @@ class UsersController extends Controller {
         if (!$user) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $user->delete();
+        $user->deleted_at = now();
+        $user->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -74,15 +67,20 @@ class UsersController extends Controller {
     }
 
     public function destroyMultiple(Request $request) {
-        $id = $request->input('dataId', []);
-        if (empty($id)) {
+        $ids = $request->input('dataId', []);
+        if (empty($ids)) {
             return response()->json([
                 'code' => 400,
                 'status' => 'error',
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        UsersModel::whereIn('id', $id)->delete();
+
+        foreach ($ids as $user_id) {
+            UsersModel::whereId($user_id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',

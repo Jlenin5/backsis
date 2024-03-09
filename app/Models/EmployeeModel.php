@@ -8,24 +8,39 @@ use Illuminate\Database\Eloquent\Model;
 class EmployeeModel extends Model {
     protected $table = 'Employee';
     protected $primaryKey = 'id';
-    public $timestamps = false;
     use HasFactory;
 
     protected $fillable = [
         'id',
+        'empImage',
         'empFirstName',
         'empSecondName',
+        'empSurname',
+        'empSecondSurname',
         'DocumentType',
+        'Avatar',
+        'WorkArea',
+        'JobPosition',
         'empDocument',
         'empEmail',
         'empPhone',
         'empGender',
         'empState',
-        'empCreatedAt',
-        'empUpdatedAt',
     ];
  
     public function documentType() {
         return $this->belongsTo(DocumentTypesModel::class, 'DocumentType', 'id');
+    }
+
+    public function avatars() {
+        return $this->belongsTo(AvatarsModel::class, 'Avatar', 'id');
+    }
+
+    public function workAreas() {
+        return $this->belongsTo(WorkAreaModel::class, 'WorkArea', 'id');
+    }
+    
+    public function jobPositions() {
+        return $this->belongsTo(JobPositionModel::class, 'JobPosition', 'id');
     }
 }
