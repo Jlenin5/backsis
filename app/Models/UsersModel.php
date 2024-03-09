@@ -20,7 +20,7 @@ class UsersModel extends Model {
     ];
 
     public function employees() {
-        return $this->belongsTo(EmployeeModel::class, 'Employee', 'id');
+        return $this->belongsTo(EmployeeModel::class, 'Employee', 'id')->with('avatars');
     }
 
     public function roles() {
