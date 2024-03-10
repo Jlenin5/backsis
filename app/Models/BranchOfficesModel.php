@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class BranchOfficesModel extends Model {
     protected $table = 'BranchOffices';
     protected $primaryKey = 'id';
-    public $timestamps = false;
     use HasFactory;
 
     protected $fillable = [
@@ -16,12 +15,12 @@ class BranchOfficesModel extends Model {
         'boName',
         'boPhone',
         'boEmail',
+        'Department',
+        'Province',
         'District',
         'boAddress',
         'User',
-        'boState',
-        'boCreatedAt',
-        'boUpdatedAt',
+        'boState'
     ];
 
     public function products() {
@@ -30,6 +29,14 @@ class BranchOfficesModel extends Model {
 
     public function users() {
         return $this->belongsTo(UsersModel::class, 'User', 'id')->with('employees');
+    }
+
+    public function departments() {
+        return $this->belongsTo(DepartmentsModel::class, 'Department', 'id');
+    }
+
+    public function provinces() {
+        return $this->belongsTo(ProvincesModel::class, 'Province', 'id');
     }
 
     public function districts() {

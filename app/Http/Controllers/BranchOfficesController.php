@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 class BranchOfficesController extends Controller {
     public function index() {
-        $bo = BranchOfficesModel::with('users','districts')->get();
+        $bo = BranchOfficesModel::with('users','departments','provinces','districts')->where('deleted_at',null)->get();
         return $bo;
     }
 
     public function getId($id) {
-        $bo = BranchOfficesModel::with('users','districts')->find($id);
+        $bo = BranchOfficesModel::with('users','departments','provinces','districts')->where('deleted_at',null)->find($id);
         if (!$bo) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -26,12 +26,12 @@ class BranchOfficesController extends Controller {
         $bo->boName = $data['boName'];
         $bo->boPhone = $data['boPhone'];
         $bo->boEmail = $data['boEmail'];
+        $bo->Department = $data['Department'];
+        $bo->Province = $data['Province'];
         $bo->District = $data['District'];
         $bo->boAddress = $data['boAddress'];
         $bo->User = $data['User'];
         $bo->boState = $data['boState'];
-        $bo->boCreatedAt = now();
-        $bo->boUpdatedAt = now();
         $bo->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -46,12 +46,12 @@ class BranchOfficesController extends Controller {
         $bo->boName = $data['boName'];
         $bo->boPhone = $data['boPhone'];
         $bo->boEmail = $data['boEmail'];
+        $bo->Department = $data['Department'];
+        $bo->Province = $data['Province'];
         $bo->District = $data['District'];
         $bo->boAddress = $data['boAddress'];
         $bo->User = $data['User'];
         $bo->boState = $data['boState'];
-        $bo->boCreatedAt = now();
-        $bo->boUpdatedAt = now();
         $bo->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
@@ -61,7 +61,8 @@ class BranchOfficesController extends Controller {
         if (!$bo) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $bo->delete();
+        $bo->deleted_at = now();
+        $bo->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -79,7 +80,12 @@ class BranchOfficesController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        BranchOfficesModel::boereIn('id', $ids)->delete();
+
+        foreach ($ids as $bo_id) {
+            BranchOfficesModel::whereId($bo_id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',
