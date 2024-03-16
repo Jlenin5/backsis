@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class QuotationsModel extends Model {
     protected $table = 'Quotations';
     protected $primaryKey = 'id';
-    public $timestamps = false;
     use HasFactory;
 
     protected $fillable = [
@@ -17,8 +16,9 @@ class QuotationsModel extends Model {
         'qtNumber',
         'Currency',
         'Company',
+        'BranchOffice',
         'Client',
-        'Employee',
+        'User',
         'qtSubtotal',
         'qtIgv',
         'qtTotal',
@@ -26,8 +26,8 @@ class QuotationsModel extends Model {
         'qtDeletedAt',
     ];
 
-    public function products() {
-        return $this->belongsToMany(ProductsModel::class, 'QuoteDetails', 'Quotation', 'Product')->withPivot('Quotation', 'Product');
+    public function quoteDetails() {
+        return $this->hasMany(QuoteDetailsModel::class, 'Quotation');
     }
 
     public function serialNumber() {
@@ -42,11 +42,15 @@ class QuotationsModel extends Model {
         return $this->belongsTo(CompanyModel::class, 'Company', 'id');
     }
 
+    public function branchOffices() {
+        return $this->belongsTo(BranchOfficesModel::class, 'BranchOffice', 'id');
+    }
+
     public function clients() {
         return $this->belongsTo(ClientsModel::class, 'Client', 'id');
     }
 
-    public function employees() {
-        return $this->belongsTo(EmployeeModel::class, 'Employee', 'id');
+    public function users() {
+        return $this->belongsTo(UsersModel::class, 'User', 'id')->with('employees');
     }
 }

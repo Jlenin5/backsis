@@ -3,24 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuotationsModel;
+use App\Models\QuoteDetailsModel;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class QuotationsController extends Controller {
     public function index() {
-        $qt = QuotationsModel::with('serialNumber','currencies','companies','clients','employees')->get();
-        $qt->each(function ($quote) {
-            $quote->products->each(function ($product) {
-                unset($product->pivot);
-            });
-        });
+        $qt = QuotationsModel::with('quoteDetails','serialNumber','currencies','companies','branchOffices','clients','users')->get();
         return $qt;
     }
 
     public function getId($id) {
-        $qt = QuotationsModel::with('serialNumber','currencies','companies','clients','employees')->findOrFail($id);
-        $qt->products->each(function ($product) {
-            unset($product->pivot);
-        });
+        $qt = QuotationsModel::with('quoteDetails','serialNumber','currencies','companies','branchOffices','clients','users')->findOrFail($id);
         if (!$qt) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -29,21 +23,36 @@ class QuotationsController extends Controller {
 
     public function store(Request $request) {
         $data = $request->json()->all();
+        $startDate = Carbon::parse($data['qtStartDate']);
+        $endDate = Carbon::parse($data['qtEndDate']);
         $qt = new QuotationsModel;
         $qt->id = $data['id'];
         $qt->SerialNumber = $data['SerialNumber'];
         $qt->qtNumber = $data['qtNumber'];
         $qt->Currency = $data['Currency'];
         $qt->Company = $data['Company'];
+        $qt->BranchOffice = $data['BranchOffice'];
         $qt->Client = $data['Client'];
-        $qt->Employee = $data['Employee'];
+        $qt->User = $data['User'];
+        $qt->qtStartDate = $startDate->format('Y-m-d');
+        $qt->qtEndDate = $endDate->format('Y-m-d');
         $qt->qtSubtotal = $data['qtSubtotal'];
         $qt->qtIgv = $data['qtIgv'];
         $qt->qtTotal = $data['qtTotal'];
-        $qt->qtCreatedAt = $data['qtCreatedAt'];
-        $qt->qtDeletedAt = $data['qtDeletedAt'];
-        $qt->save();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
+        // $qt->save();
+        foreach($data['products'] as $products) {
+            $qtDetail = new QuoteDetailsModel([
+                'qtdProdName' => $products['prodName'],
+                'qtdProdPrice' => $products['prodSalePrice'],
+                'Product' => $products['id'],
+                'Quotation' => $data['id'],
+                'qtdQuantity' => $data['prodStock'],
+                'qtdSubTotal' => $data['prodSalePrice'],
+                'qtdTotal' => $data['prodSalePrice']
+            ]);
+            $qtDetail->save();
+        }
+        return response()->json(['code'=>200,'status'=>'success','message'=>$qt]);
     }
 
     public function show(QuotationsModel $qt) {
@@ -52,20 +61,23 @@ class QuotationsController extends Controller {
 
     public function update(Request $request, $id) {
         $data = $request->json()->all();
+        $startDate = Carbon::parse($data['qtStartDate']);
+        $endDate = Carbon::parse($data['qtEndDate']);
         $qt = QuotationsModel::find($id);
         $qt->SerialNumber = $data['SerialNumber'];
         $qt->qtNumber = $data['qtNumber'];
         $qt->Currency = $data['Currency'];
         $qt->Company = $data['Company'];
+        $qt->BranchOffice = $data['BranchOffice'];
         $qt->Client = $data['Client'];
-        $qt->Employee = $data['Employee'];
+        $qt->User = $data['User'];
+        $qt->qtStartDate = $startDate->format('Y-m-d');
+        $qt->qtEndDate = $endDate->format('Y-m-d');
         $qt->qtSubtotal = $data['qtSubtotal'];
         $qt->qtIgv = $data['qtIgv'];
         $qt->qtTotal = $data['qtTotal'];
-        $qt->qtCreatedAt = $data['qtCreatedAt'];
-        $qt->qtDeletedAt = $data['qtDeletedAt'];
-        $qt->update();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
+        // $qt->update();
+        return response()->json(['code'=>200,'status'=>'success','message'=>$qt]);
     }
 
     public function destroy($id) {
