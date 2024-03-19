@@ -36,6 +36,7 @@ use App\Http\Controllers\BranchOfficeStaffController;
 use App\Http\Controllers\CarriersController;
 use App\Http\Controllers\JobPositionController;
 use App\Http\Controllers\MobilitiesController;
+use App\Http\Controllers\PurchaseOrdersController;
 use App\Http\Controllers\TaxesController;
 use App\Http\Controllers\WorkAreaController;
 use Illuminate\Http\Request;
@@ -295,6 +296,15 @@ Route::controller(ProvincesController::class)->group(function() {
     Route::delete('/deleteprov/{id}', 'destroy');
     Route::get('/provmax', 'getMaxId');
     Route::delete('/delprovmulti', 'destroyMultiple');
+});
+Route::controller(PurchaseOrdersController::class)->group(function() {
+    Route::get('/puor', 'index');
+    Route::get('/puor/{id}', 'getId');
+    Route::post('/postpuor', 'store');
+    Route::put('/updatepuor/{id}', 'update');
+    Route::delete('/deletepuor/{id}', 'destroy');
+    Route::get('/puormax', 'getMaxId');
+    Route::delete('/delpuormulti', 'destroyMultiple');
 });
 Route::controller(QuotationsController::class)->group(function() {
     Route::get('/qt', 'index');
