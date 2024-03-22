@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class SuppliersModel extends Model {
     protected $table = 'Suppliers';
     protected $primaryKey = 'id';
-    public $timestamps = false;
     use HasFactory;
 
     protected $fillable = [
@@ -17,10 +16,9 @@ class SuppliersModel extends Model {
         'suppDocument',
         'suppCompanyName',
         'suppEmail',
+        'suppAddress',
         'suppPhone',
         'suppState',
-        'suppCreatedAt',
-        'suppUpdatedAt',
     ];
 
     public function documentType() {

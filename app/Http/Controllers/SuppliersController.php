@@ -29,9 +29,8 @@ class SuppliersController extends Controller {
         $supp->suppCompanyName = $data['suppCompanyName'];
         $supp->suppEmail = $data['suppEmail'];
         $supp->suppPhone = $data['suppPhone'];
+        $supp->suppAddress = $data['suppAddress'];
         $supp->suppState = $data['suppState'];
-        $supp->suppCreatedAt = $data['suppCreatedAt'];
-        $supp->suppUpdatedAt = $data['suppUpdatedAt'];
         $supp->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -47,10 +46,9 @@ class SuppliersController extends Controller {
         $supp->suppDocument = $data['suppDocument'];
         $supp->suppCompanyName = $data['suppCompanyName'];
         $supp->suppEmail = $data['suppEmail'];
+        $supp->suppAddress = $data['suppAddress'];
         $supp->suppPhone = $data['suppPhone'];
         $supp->suppState = $data['suppState'];
-        $supp->suppCreatedAt = $data['suppCreatedAt'];
-        $supp->suppUpdatedAt = $data['suppUpdatedAt'];
         $supp->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
