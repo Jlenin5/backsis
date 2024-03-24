@@ -18,7 +18,7 @@ class PurchaseOrdersModel extends Model {
         'Currency',
         'Company',
         'BranchOffice',
-        'Client',
+        'Supplier',
         'User',
         'puorStartDate',
         'puorEndDate',
@@ -40,15 +40,15 @@ class PurchaseOrdersModel extends Model {
     }
 
     public function companies() {
-        return $this->belongsTo(CompanyModel::class, 'Company', 'id');
+        return $this->belongsTo(CompanyModel::class, 'Company', 'id');  
     }
 
     public function branchOffices() {
         return $this->belongsTo(BranchOfficesModel::class, 'BranchOffice', 'id');
     }
 
-    public function clients() {
-        return $this->belongsTo(ClientsModel::class, 'Client', 'id');
+    public function suppliers() {
+        return $this->belongsTo(SuppliersModel::class, 'Supplier', 'id');
     }
 
     public function users() {

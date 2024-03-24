@@ -9,12 +9,12 @@ use Carbon\Carbon;
 
 class PurchaseOrdersController extends Controller {
     public function index() {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','branchOffices','clients','users')->get();
+        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','branchOffices','suppliers','users')->get();
         return $puor;
     }
 
     public function getId($id) {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','branchOffices','clients','users')->findOrFail($id);
+        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','branchOffices','suppliers','users')->findOrFail($id);
         if (!$puor) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -32,7 +32,7 @@ class PurchaseOrdersController extends Controller {
         $puor->Currency = $data['Currency'];
         $puor->Company = $data['Company'];
         $puor->BranchOffice = $data['BranchOffice'];
-        $puor->Client = $data['Client'];
+        $puor->Supplier = $data['Supplier'];
         $puor->User = $data['User'];
         $puor->puorStartDate = $startDate->format('Y-m-d');
         $puor->puorEndDate = $endDate->format('Y-m-d');
@@ -69,7 +69,7 @@ class PurchaseOrdersController extends Controller {
         $puor->Currency = $data['Currency'];
         $puor->Company = $data['Company'];
         $puor->BranchOffice = $data['BranchOffice'];
-        $puor->Client = $data['Client'];
+        $puor->Supplier = $data['Supplier'];
         $puor->User = $data['User'];
         $puor->puorStartDate = $startDate->format('Y-m-d');
         $puor->puorEndDate = $endDate->format('Y-m-d');
