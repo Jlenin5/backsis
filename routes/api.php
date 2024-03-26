@@ -269,6 +269,7 @@ Route::controller(ProductsController::class)->group(function() {
     Route::delete('/deleteprod/{id}', 'destroy');
     Route::get('/prodmax', 'getMaxId');
     Route::delete('/delprodmulti', 'destroyMultiple');
+    Route::get('/prodfeatured/{featured}', 'featuredId');
 });
 Route::controller(ProductUnitController::class)->group(function() {
     Route::get('/prun', 'index');

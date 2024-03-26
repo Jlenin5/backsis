@@ -199,4 +199,19 @@ class ProductsController extends Controller {
         ]);
     }
 
+
+    public function featuredId($featured) {
+        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'branchOffices')->where('prodNumber',$featured)->first();
+        $prod->categories->each(function ($category) {
+            unset($category->pivot);
+        });
+        $prod->branchOffices->each(function ($branchOffice) {
+            unset($branchOffice->pivot);
+        });
+        if (!$prod) {
+            return response()->json(['message' => 'No hay datos para mostrar'], 404);
+        }
+        return $prod;
+    }
+
 }
