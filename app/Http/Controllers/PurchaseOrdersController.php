@@ -9,12 +9,12 @@ use Carbon\Carbon;
 
 class PurchaseOrdersController extends Controller {
     public function index() {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','branchOffices','suppliers','users')->get();
+        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->get();
         return $puor;
     }
 
     public function getId($id) {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','branchOffices','suppliers','users')->findOrFail($id);
+        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->findOrFail($id);
         if (!$puor) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -31,7 +31,7 @@ class PurchaseOrdersController extends Controller {
         $puor->puorNumber = $data['puorNumber'];
         $puor->Currency = $data['Currency'];
         $puor->Company = $data['Company'];
-        $puor->BranchOffice = $data['BranchOffice'];
+        $puor->Warehouse = $data['Warehouse'];
         $puor->Supplier = $data['Supplier'];
         $puor->User = $data['User'];
         $puor->puorStartDate = $startDate->format('Y-m-d');
@@ -40,17 +40,17 @@ class PurchaseOrdersController extends Controller {
         $puor->puorIgv = $data['puorIgv'];
         $puor->puorTotal = $data['puorTotal'];
         // $puor->save();
-        foreach($data['products'] as $products) {
+        foreach($data['purchase_order_details'] as $prodDetail) {
             $puorDetail = new PurchaseOrderDetailsModel([
-                'podProdName' => $products['prodName'],
-                'podProdPrice' => $products['prodSalePrice'],
-                'Product' => $products['id'],
-                'Quotation' => $data['id'],
+                'podProdName' => $prodDetail['prodName'],
+                'podProdPrice' => $prodDetail['prodSalePrice'],
+                'Product' => $prodDetail['id'],
+                'PurchaseOrder' => $data['id'],
                 'podQuantity' => $data['prodStock'],
                 'podSubTotal' => $data['prodSalePrice'],
                 'podTotal' => $data['prodSalePrice']
             ]);
-            $puorDetail->save();
+            // $puorDetail->save();
         }
         return response()->json(['code'=>200,'status'=>'success','message'=>$puor]);
     }
@@ -68,7 +68,7 @@ class PurchaseOrdersController extends Controller {
         $puor->puorNumber = $data['puorNumber'];
         $puor->Currency = $data['Currency'];
         $puor->Company = $data['Company'];
-        $puor->BranchOffice = $data['BranchOffice'];
+        $puor->Warehouse = $data['Warehouse'];
         $puor->Supplier = $data['Supplier'];
         $puor->User = $data['User'];
         $puor->puorStartDate = $startDate->format('Y-m-d');

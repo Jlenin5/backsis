@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductBranchOfficeModel;
+use App\Models\ProductWarehouseModel;
 use Illuminate\Http\Request;
 
 class ProductBranchOfficeController extends Controller {
     public function index() {
-        $prbo = ProductBranchOfficeModel::get();
+        $prbo = ProductWarehouseModel::get();
         return $prbo;
     }
 
     public function getId($id) {
-        $prbo = ProductBranchOfficeModel::find($id);
+        $prbo = ProductWarehouseModel::find($id);
         if (!$prbo) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -21,7 +21,7 @@ class ProductBranchOfficeController extends Controller {
 
     public function store(Request $request) {
         $data = $request->json()->all();
-        $prbo = new ProductBranchOfficeModel;
+        $prbo = new ProductWarehouseModel;
         $prbo->id = $data['id'];
         $prbo->Product = $data['Product'];
         $prbo->BranchOffice = $data['BranchOffice'];
@@ -29,13 +29,13 @@ class ProductBranchOfficeController extends Controller {
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
 
-    public function show(ProductBranchOfficeModel $prbo) {
+    public function show(ProductWarehouseModel $prbo) {
         return $prbo;
     }
 
     public function update(Request $request, $id) {
         $data = $request->json()->all();
-        $prbo = ProductBranchOfficeModel::find($id);
+        $prbo = ProductWarehouseModel::find($id);
         $prbo->Product = $data['Product'];
         $prbo->BranchOffice = $data['BranchOffice'];
         $prbo->update();
@@ -43,7 +43,7 @@ class ProductBranchOfficeController extends Controller {
     }
 
     public function destroy($id) {
-        $prbo = ProductBranchOfficeModel::find($id);
+        $prbo = ProductWarehouseModel::find($id);
         if (!$prbo) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
@@ -52,7 +52,7 @@ class ProductBranchOfficeController extends Controller {
     }
 
     public function getMaxId() {
-        $ultimoId = ProductBranchOfficeModel::max('id');
+        $ultimoId = ProductWarehouseModel::max('id');
         return response()->json(['ultimo_id' => $ultimoId]);
     }
 
@@ -65,7 +65,7 @@ class ProductBranchOfficeController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        ProductBranchOfficeModel::whereIn('id', $ids)->delete();
+        ProductWarehouseModel::whereIn('id', $ids)->delete();
         return response()->json([
             'code' => 200,
             'status' => 'success',

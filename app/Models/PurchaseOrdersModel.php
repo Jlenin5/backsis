@@ -17,7 +17,7 @@ class PurchaseOrdersModel extends Model {
         'puorNumber',
         'Currency',
         'Company',
-        'BranchOffice',
+        'Warehouse',
         'Supplier',
         'User',
         'puorStartDate',
@@ -26,6 +26,10 @@ class PurchaseOrdersModel extends Model {
         'puorTax',
         'puorTotal'
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
+    protected $dates = ['deleted_at'];
 
     public function purchaseOrderDetails() {
         return $this->hasMany(PurchaseOrderDetailsModel::class, 'PurchaseOrder');
@@ -43,8 +47,8 @@ class PurchaseOrdersModel extends Model {
         return $this->belongsTo(CompanyModel::class, 'Company', 'id');  
     }
 
-    public function branchOffices() {
-        return $this->belongsTo(BranchOfficesModel::class, 'BranchOffice', 'id');
+    public function warehouses() {
+        return $this->belongsTo(WarehousesModel::class, 'Warehouse', 'id');
     }
 
     public function suppliers() {
