@@ -38,6 +38,7 @@ use App\Http\Controllers\JobPositionController;
 use App\Http\Controllers\MobilitiesController;
 use App\Http\Controllers\PurchaseOrdersController;
 use App\Http\Controllers\TaxesController;
+use App\Http\Controllers\WarehousesController;
 use App\Http\Controllers\WorkAreaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -387,6 +388,15 @@ Route::controller(UsersController::class)->group(function() {
     Route::delete('/deleteuser/{id}', 'destroy');
     Route::get('/usermax', 'getMaxId');
     Route::delete('/delusermulti', 'destroyMultiple');
+});
+Route::controller(WarehousesController::class)->group(function() {
+    Route::get('/wh', 'index');
+    Route::get('/wh/{id}', 'getId');
+    Route::post('/postwh', 'store');
+    Route::put('/updatewh/{id}', 'update');
+    Route::delete('/deletewh/{id}', 'destroy');
+    Route::get('/whmax', 'getMaxId');
+    Route::delete('/delwhmulti', 'destroyMultiple');
 });
 Route::controller(WorkAreaController::class)->group(function() {
     Route::get('/wa', 'index');
