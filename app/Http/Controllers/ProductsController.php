@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductBranchOfficeModel;
+use App\Models\ProductWarehouseModel;
 use App\Models\ProductCategoryModel;
 use App\Models\ProductImagesModel;
 use Illuminate\Support\Facades\Validator;
@@ -16,12 +16,12 @@ use GuzzleHttp\Client;
 class ProductsController extends Controller {
 
     public function index() {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'branchOffices')->get();
+        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->get();
         $prod->each(function ($product) {
             $product->categories->each(function ($category) {
                 unset($category->pivot);
             });
-            $product->branchOffices->each(function ($branchOffice) {
+            $product->warehouses->each(function ($branchOffice) {
                 unset($branchOffice->pivot);
             });
         });
@@ -29,11 +29,11 @@ class ProductsController extends Controller {
     }
 
     public function getId($id) {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'branchOffices')->findOrFail($id);
+        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->findOrFail($id);
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });
-        $prod->branchOffices->each(function ($branchOffice) {
+        $prod->warehouses->each(function ($branchOffice) {
             unset($branchOffice->pivot);
         });
         if (!$prod) {
@@ -87,7 +87,7 @@ class ProductsController extends Controller {
 
         if (isset($request->branch_offices) && is_array($request->branch_offices)) {
             foreach ($data['branch_offices'] as $branchOfficeId) {
-                $prodBranchOffice = new ProductBranchOfficeModel([
+                $prodBranchOffice = new ProductWarehouseModel([
                     'Product' => $prod->id,
                     'BranchOffice' => $branchOfficeId['id'],
                 ]);
@@ -144,10 +144,10 @@ class ProductsController extends Controller {
             }
         }
 
-        $prod->branchOffices()->detach();
+        $prod->warehouses()->detach();
         if (isset($data['branch_offices']) && is_array($data['branch_offices'])) {
             foreach ($data['branch_offices'] as $branchOfficeId) {
-                $prod->branchOffices()->attach($branchOfficeId['id']);
+                $prod->warehouses()->attach($branchOfficeId['id']);
             }
         }
 
@@ -157,7 +157,7 @@ class ProductsController extends Controller {
     public function destroy($id) {
         $prod = ProductsModel::find($id);
         $prod->categories()->detach();
-        $prod->branchOffices()->detach();
+        $prod->warehouses()->detach();
         if (!$prod) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
@@ -185,7 +185,7 @@ class ProductsController extends Controller {
                 $product = ProductsModel::find($productId);
                 if ($product) {
                     $product->categories()->detach();
-                    $product->branchOffices()->detach();
+                    $product->warehouses()->detach();
                 }
             }
             ProductsModel::whereIn('id', $ids)->delete();
@@ -201,11 +201,11 @@ class ProductsController extends Controller {
 
 
     public function featuredId($featured) {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'branchOffices')->where('prodNumber',$featured)->first();
+        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->where('prodNumber',$featured)->first();
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });
-        $prod->branchOffices->each(function ($branchOffice) {
+        $prod->warehouses->each(function ($branchOffice) {
             unset($branchOffice->pivot);
         });
         if (!$prod) {

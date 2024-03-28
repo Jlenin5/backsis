@@ -48,8 +48,8 @@ class ProductsModel extends Model {
         return $this->belongsTo(ProductUnitModel::class, 'Unit', 'id');
     }
 
-    public function branchOffices() {
-        return $this->belongsToMany(BranchOfficesModel::class, 'ProductBranchOffice', 'Product', 'BranchOffice')->withPivot('Product', 'BranchOffice');
+    public function warehouses() {
+        return $this->belongsToMany(WarehousesModel::class, 'ProductWarehouse', 'Product', 'Warehouse')->withPivot('Product', 'Warehouse');
     }
 
     public function quotes() {
