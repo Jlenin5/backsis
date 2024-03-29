@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseOrdersModel extends Model {
     protected $table = 'PurchaseOrders';
     protected $primaryKey = 'id';
-    public $timestamps = false;
     use HasFactory;
 
     protected $fillable = [

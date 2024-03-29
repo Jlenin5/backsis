@@ -13,12 +13,13 @@ class PurchaseOrderDetailsModel extends Model {
 
     protected $fillable = [
         'id',
-        'podProdName',
-        'podProdPrice',
         'Product',
         'PurchaseOrder',
+        'podPrice',
+        'podTax',
+        'podDiscountMethod',
+        'podDiscount',
         'podQuantity',
-        'podSubtotal',
-        'podTotal',
+        'podTotal'
     ];
 }

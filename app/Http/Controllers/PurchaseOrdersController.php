@@ -37,20 +37,21 @@ class PurchaseOrdersController extends Controller {
         $puor->puorStartDate = $startDate->format('Y-m-d');
         $puor->puorEndDate = $endDate->format('Y-m-d');
         $puor->puorSubtotal = $data['puorSubtotal'];
-        $puor->puorIgv = $data['puorIgv'];
+        $puor->puorTax = $data['puorTax'];
         $puor->puorTotal = $data['puorTotal'];
-        // $puor->save();
+        $puor->save();
         foreach($data['purchase_order_details'] as $prodDetail) {
             $puorDetail = new PurchaseOrderDetailsModel([
-                'podProdName' => $prodDetail['prodName'],
-                'podProdPrice' => $prodDetail['prodSalePrice'],
                 'Product' => $prodDetail['id'],
                 'PurchaseOrder' => $data['id'],
-                'podQuantity' => $data['prodStock'],
-                'podSubTotal' => $data['prodSalePrice'],
-                'podTotal' => $data['prodSalePrice']
+                'podPrice' => $prodDetail['podPrice'],
+                'podTax' => $prodDetail['podTax'],
+                'podDiscountMethod' => $prodDetail['podDiscountMethod'],
+                'podDiscount' => $prodDetail['podDiscount'],
+                'podQuantity' => $prodDetail['podQuantity'],
+                'podTotal' => $prodDetail['podTotal']
             ]);
-            // $puorDetail->save();
+            $puorDetail->save();
         }
         return response()->json(['code'=>200,'status'=>'success','message'=>$puor]);
     }
@@ -74,10 +75,38 @@ class PurchaseOrdersController extends Controller {
         $puor->puorStartDate = $startDate->format('Y-m-d');
         $puor->puorEndDate = $endDate->format('Y-m-d');
         $puor->puorSubtotal = $data['puorSubtotal'];
-        $puor->puorIgv = $data['puorIgv'];
+        $puor->puorTax = $data['puorTax'];
         $puor->puorTotal = $data['puorTotal'];
-        // $puor->update();
-        return response()->json(['code'=>200,'status'=>'success','message'=>$puor]);
+        $puor->update();
+        if (isset($data['purchase_order_details']) && is_array($data['purchase_order_details'])) {
+            foreach ($data['purchase_order_details'] as $pod) {
+                $existingDetail = PurchaseOrderDetailsModel::where('Product', $pod['Product'])
+                                                            ->where('PurchaseOrder', $id)
+                                                            ->first();
+                if ($existingDetail) {
+                    $existingDetail->podPrice = $pod['podPrice'];
+                    $existingDetail->podTax = $pod['podTax'];
+                    $existingDetail->podDiscountMethod = $pod['podDiscountMethod'];
+                    $existingDetail->podDiscount = $pod['podDiscount'];
+                    $existingDetail->podQuantity = $pod['podQuantity'];
+                    $existingDetail->podTotal = $pod['podTotal'];
+                    $existingDetail->update();
+                } else {
+                    $newDetail = new PurchaseOrderDetailsModel([
+                        'Product' => $pod['Product'],
+                        'PurchaseOrder' => $id,
+                        'podPrice' => $pod['podPrice'],
+                        'podTax' => $pod['podTax'],
+                        'podDiscountMethod' => $pod['podDiscountMethod'],
+                        'podDiscount' => $pod['podDiscount'],
+                        'podQuantity' => $pod['podQuantity'],
+                        'podTotal' => $pod['podTotal']
+                    ]);
+                    $newDetail->save();
+                }
+            }
+        }
+        return response()->json(['code'=>200,'status'=>'success','message'=>$request->all()]);
     }
 
     public function destroy($id) {
