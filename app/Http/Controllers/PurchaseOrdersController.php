@@ -6,6 +6,9 @@ use App\Models\PurchaseOrderDetailsModel;
 use App\Models\PurchaseOrdersModel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PurchaseOrderExcel;
 
 class PurchaseOrdersController extends Controller {
 
@@ -170,5 +173,27 @@ class PurchaseOrdersController extends Controller {
             'status' => 'success',
             'message' => 'Elementos eliminadas correctamente.'
         ]);
+    }
+
+    public function exportExcel(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        $puor = PurchaseOrdersModel::with(
+                'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+            )
+            ->whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $fileName = 'archivo.xlsx';
+        // $filePath = storage_path('app/exports/' . $fileName);
+
+        return Excel::download(new PurchaseOrderExcel($puor), 'orden_de_compra.xlsx');
+        // return response()->json(['message' => $request]);
     }
 }

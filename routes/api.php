@@ -307,6 +307,7 @@ Route::controller(PurchaseOrdersController::class)->group(function() {
     Route::delete('/deletepuor/{id}', 'destroy');
     Route::get('/puormax', 'getMaxId');
     Route::delete('/delpuormulti', 'destroyMultiple');
+    Route::get('/excelpuor', 'exportExcel');
 });
 Route::controller(QuotationsController::class)->group(function() {
     Route::get('/qt', 'index');
