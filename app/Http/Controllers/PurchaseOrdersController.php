@@ -9,12 +9,12 @@ use Carbon\Carbon;
 
 class PurchaseOrdersController extends Controller {
     public function index() {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->get();
+        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->where('deleted_at',null)->get();
         return $puor;
     }
 
     public function getId($id) {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->findOrFail($id);
+        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->where('deleted_at',null)->findOrFail($id);
         if (!$puor) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -106,6 +106,13 @@ class PurchaseOrdersController extends Controller {
                 }
             }
         }
+        $currentDetails = PurchaseOrderDetailsModel::where('PurchaseOrder', $id)->pluck('Product');
+        $incomingDetails = collect($data['purchase_order_details'])->pluck('Product');
+        $detailsToDelete = $currentDetails->diff($incomingDetails);
+        
+        PurchaseOrderDetailsModel::where('PurchaseOrder', $id)
+                                ->whereIn('Product', $detailsToDelete)
+                                ->delete();
         return response()->json(['code'=>200,'status'=>'success','message'=>$request->all()]);
     }
 
@@ -114,7 +121,8 @@ class PurchaseOrdersController extends Controller {
         if (!$puor) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $puor->delete();
+        $puor->deleted_at = now();
+        $puor->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -124,15 +132,20 @@ class PurchaseOrdersController extends Controller {
     }
 
     public function destroyMultiple(Request $request) {
-        $id = $request->input('dataId', []);
-        if (empty($id)) {
+        $ids = $request->input('dataId', []);
+        if (empty($ids)) {
             return response()->json([
                 'code' => 400,
                 'status' => 'error',
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        PurchaseOrdersModel::whereIn('id', $id)->delete();
+        
+        foreach ($ids as $puor_id) {
+            PurchaseOrdersModel::whereId($puor_id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',
