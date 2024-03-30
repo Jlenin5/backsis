@@ -8,9 +8,28 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class PurchaseOrdersController extends Controller {
-    public function index() {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->where('deleted_at',null)->get();
-        return $puor;
+
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        $puor = PurchaseOrdersModel::with(
+                'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+            )
+            ->whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalRows = PurchaseOrdersModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $puor,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
