@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PurchaseOrderExcel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PurchaseOrdersController extends Controller {
 
@@ -195,5 +196,24 @@ class PurchaseOrdersController extends Controller {
 
         return Excel::download(new PurchaseOrderExcel($puor), 'orden_de_compra.xlsx');
         // return response()->json(['message' => $request]);
+    }
+
+    public function exportPDF(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        $purchase_orders = PurchaseOrdersModel::with(
+                'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+            )
+            ->whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pdf = PDF::loadView('export.pdf.purchase_order', compact('purchase_orders'));
+        return $pdf->stream("OC" . date('Y-m-d h:i:s') . ".pdf");
     }
 }

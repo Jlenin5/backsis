@@ -308,6 +308,7 @@ Route::controller(PurchaseOrdersController::class)->group(function() {
     Route::get('/puormax', 'getMaxId');
     Route::delete('/delpuormulti', 'destroyMultiple');
     Route::get('/excelpuor', 'exportExcel');
+    Route::get('/pdfpuor', 'exportPDF');
 });
 Route::controller(QuotationsController::class)->group(function() {
     Route::get('/qt', 'index');
