@@ -16,17 +16,40 @@ class PurchaseOrdersController extends Controller {
     public function index(Request $request) {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+        $searchText = $request->query('search_text');
 
         $offset = ($page - 1) * $perPage;
 
-        $puor = PurchaseOrdersModel::with(
-                'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
-            )
-            ->whereNull('deleted_at')
-            ->offset($offset)
-            ->limit($perPage)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = PurchaseOrdersModel::with(
+            'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+        )
+        ->whereNull('deleted_at');
+
+        if ($searchText) {
+            $query->where(function ($query) use ($searchText) {
+                $query->where('puorNumber', 'LIKE', "%{$searchText}%")
+                        ->orWhereHas('currencies', function ($query) use ($searchText) {
+                            $query->where('curName', 'LIKE', "%{$searchText}%");
+                        })
+                        ->orWhereHas('suppliers', function ($query) use ($searchText) {
+                            $query->where('suppCompanyName', 'LIKE', "%{$searchText}%");
+                        })
+                        ->orWhereHas('users.employees', function ($query) use ($searchText) {
+                            $query->where(function ($query) use ($searchText) {
+                                $query->where('empFirstName', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSecondName', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSurname', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSecondSurname', 'LIKE', "%{$searchText}%")
+                                      ->orWhereRaw("CONCAT(empFirstName, ' ', empSecondName, ' ', empSurname, ' ', empSecondSurname) LIKE ?", ["%{$searchText}%"]);
+                            });
+                        });
+            });
+        }
+
+        $puor = $query->offset($offset)
+                  ->limit($perPage)
+                  ->orderBy('created_at', 'desc')
+                  ->get();
 
         $totalRows = PurchaseOrdersModel::whereNull('deleted_at')->count();
 
@@ -179,17 +202,40 @@ class PurchaseOrdersController extends Controller {
     public function exportExcel(Request $request) {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+        $searchText = $request->query('search_text');
 
         $offset = ($page - 1) * $perPage;
 
-        $puor = PurchaseOrdersModel::with(
-                'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
-            )
-            ->whereNull('deleted_at')
-            ->offset($offset)
-            ->limit($perPage)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = PurchaseOrdersModel::with(
+            'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+        )
+        ->whereNull('deleted_at');
+
+        if ($searchText) {
+            $query->where(function ($query) use ($searchText) {
+                $query->where('puorNumber', 'LIKE', "%{$searchText}%")
+                        ->orWhereHas('currencies', function ($query) use ($searchText) {
+                            $query->where('curName', 'LIKE', "%{$searchText}%");
+                        })
+                        ->orWhereHas('suppliers', function ($query) use ($searchText) {
+                            $query->where('suppCompanyName', 'LIKE', "%{$searchText}%");
+                        })
+                        ->orWhereHas('users.employees', function ($query) use ($searchText) {
+                            $query->where(function ($query) use ($searchText) {
+                                $query->where('empFirstName', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSecondName', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSurname', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSecondSurname', 'LIKE', "%{$searchText}%")
+                                      ->orWhereRaw("CONCAT(empFirstName, ' ', empSecondName, ' ', empSurname, ' ', empSecondSurname) LIKE ?", ["%{$searchText}%"]);
+                            });
+                        });
+            });
+        }
+
+        $puor = $query->offset($offset)
+                  ->limit($perPage)
+                  ->orderBy('created_at', 'desc')
+                  ->get();
             
         $fileName = 'archivo.xlsx';
         // $filePath = storage_path('app/exports/' . $fileName);
@@ -201,17 +247,40 @@ class PurchaseOrdersController extends Controller {
     public function exportPDF(Request $request) {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+        $searchText = $request->query('search_text');
 
         $offset = ($page - 1) * $perPage;
 
-        $purchase_orders = PurchaseOrdersModel::with(
-                'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
-            )
-            ->whereNull('deleted_at')
-            ->offset($offset)
-            ->limit($perPage)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = PurchaseOrdersModel::with(
+            'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+        )
+        ->whereNull('deleted_at');
+
+        if ($searchText) {
+            $query->where(function ($query) use ($searchText) {
+                $query->where('puorNumber', 'LIKE', "%{$searchText}%")
+                        ->orWhereHas('currencies', function ($query) use ($searchText) {
+                            $query->where('curName', 'LIKE', "%{$searchText}%");
+                        })
+                        ->orWhereHas('suppliers', function ($query) use ($searchText) {
+                            $query->where('suppCompanyName', 'LIKE', "%{$searchText}%");
+                        })
+                        ->orWhereHas('users.employees', function ($query) use ($searchText) {
+                            $query->where(function ($query) use ($searchText) {
+                                $query->where('empFirstName', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSecondName', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSurname', 'LIKE', "%{$searchText}%")
+                                      ->orWhere('empSecondSurname', 'LIKE', "%{$searchText}%")
+                                      ->orWhereRaw("CONCAT(empFirstName, ' ', empSecondName, ' ', empSurname, ' ', empSecondSurname) LIKE ?", ["%{$searchText}%"]);
+                            });
+                        });
+            });
+        }
+
+        $purchase_orders = $query->offset($offset)
+                  ->limit($perPage)
+                  ->orderBy('created_at', 'desc')
+                  ->get();
 
         $pdf = PDF::loadView('export.pdf.purchase_order', compact('purchase_orders'));
         return $pdf->stream("OC" . date('Y-m-d h:i:s') . ".pdf");
