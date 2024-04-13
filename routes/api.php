@@ -309,6 +309,7 @@ Route::controller(PurchaseOrdersController::class)->group(function() {
     Route::delete('/delpuormulti', 'destroyMultiple');
     Route::get('/excelpuor', 'exportExcel');
     Route::get('/pdfpuor', 'exportPDF');
+    Route::get('/pdfpuorid/{id}', 'exportPDFId');
 });
 Route::controller(QuotationsController::class)->group(function() {
     Route::get('/qt', 'index');

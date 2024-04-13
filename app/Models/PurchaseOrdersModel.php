@@ -51,7 +51,7 @@ class PurchaseOrdersModel extends Model {
     }
 
     public function suppliers() {
-        return $this->belongsTo(SuppliersModel::class, 'Supplier', 'id');
+        return $this->belongsTo(SuppliersModel::class, 'Supplier', 'id')->with('documentType');
     }
 
     public function users() {

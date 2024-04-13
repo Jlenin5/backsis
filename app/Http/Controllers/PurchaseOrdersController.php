@@ -285,4 +285,13 @@ class PurchaseOrdersController extends Controller {
         $pdf = PDF::loadView('export.pdf.purchase_order', compact('purchase_orders'));
         return $pdf->stream("OC" . date('Y-m-d h:i:s') . ".pdf");
     }
+
+    public function exportPDFId($id) {
+        $purchase_order = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->where('deleted_at',null)->findOrFail($id);
+        if (!$purchase_order) {
+            return response()->json(['message' => 'No hay datos para mostrar'], 404);
+        }
+        $pdf = PDF::loadView('export.pdf.purchase_order_id', compact('purchase_order'));
+        return $pdf->stream("OC" . date('Y-m-d h:i:s') . ".pdf");
+    }
 }
