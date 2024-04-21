@@ -2,11 +2,9 @@
 
 use App\Http\Controllers\AvatarsController;
 use App\Http\Controllers\CategoriesController;
-use App\Http\Controllers\DistrictsController;
 use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CurrenciesController;
-use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DocumentContentController;
 use App\Http\Controllers\DocumentStatusController;
 use App\Http\Controllers\DocumentTypesController;
@@ -22,7 +20,6 @@ use App\Http\Controllers\ProductImagesController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProductBranchOfficeController;
-use App\Http\Controllers\ProvincesController;
 use App\Http\Controllers\QuotationsController;
 use App\Http\Controllers\QuoteDetailsController;
 use App\Http\Controllers\RolesController;
@@ -38,6 +35,7 @@ use App\Http\Controllers\JobPositionController;
 use App\Http\Controllers\MobilitiesController;
 use App\Http\Controllers\PurchaseOrdersController;
 use App\Http\Controllers\TaxesController;
+use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\WorkAreaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -91,15 +89,6 @@ Route::controller(CategoriesController::class)->group(function() {
     Route::get('/catemax', 'getMaxId');
     Route::delete('/delcatemulti', 'destroyMultiple');
 });
-Route::controller(DistrictsController::class)->group(function() {
-    Route::get('/dis', 'index');
-    Route::get('/dis/{id}', 'getId');
-    Route::post('/postdis', 'store');
-    Route::put('/updatedis/{id}', 'update');
-    Route::delete('/deletedis/{id}', 'destroy');
-    Route::get('/dismax', 'getMaxId');
-    Route::delete('/deldismulti', 'destroyMultiple');
-});
 Route::controller(ClientsController::class)->group(function() {
     Route::get('/cli', 'index');
     Route::get('/cli/{id}', 'getId');
@@ -127,15 +116,10 @@ Route::controller(CurrenciesController::class)->group(function() {
     Route::get('/curmax', 'getMaxId');
     Route::delete('/delcurmulti', 'destroyMultiple');
 });
-Route::resource('/departments', DepartmentsController::class);
-Route::controller(DepartmentsController::class)->group(function() {
-    // Route::get('/dep', 'index');
-    // Route::get('/dep/{id}', 'getId');
-    // Route::post('/postdep', 'store');
-    // Route::post('/updatedep/{id}', 'update');
-    // Route::delete('/deletedep/{id}', 'destroy');
-    Route::get('/depmax', 'getMaxId');
-    Route::delete('/deldepmulti', 'destroyMultiple');
+Route::controller(UbigeoController::class)->group(function() {
+    Route::get('departments', 'departments');
+    Route::get('provinces/{department_id}', 'provinces');
+    Route::get('districts/{province_id}', 'districts');
 });
 Route::controller(DocumentContentController::class)->group(function() {
     Route::get('/doco', 'index');
@@ -288,15 +272,6 @@ Route::controller(ProductBranchOfficeController::class)->group(function() {
     Route::delete('/deleteprbo/{id}', 'destroy');
     Route::get('/prbomax', 'getMaxId');
     Route::delete('/delprbomulti', 'destroyMultiple');
-});
-Route::controller(ProvincesController::class)->group(function() {
-    Route::get('/prov', 'index');
-    Route::get('/prov/{id}', 'getId');
-    Route::post('/postprov', 'store');
-    Route::put('/updateprov/{id}', 'update');
-    Route::delete('/deleteprov/{id}', 'destroy');
-    Route::get('/provmax', 'getMaxId');
-    Route::delete('/delprovmulti', 'destroyMultiple');
 });
 Route::controller(PurchaseOrdersController::class)->group(function() {
     Route::get('/puor', 'index');
