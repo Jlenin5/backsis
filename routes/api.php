@@ -127,12 +127,13 @@ Route::controller(CurrenciesController::class)->group(function() {
     Route::get('/curmax', 'getMaxId');
     Route::delete('/delcurmulti', 'destroyMultiple');
 });
+Route::resource('/departments', DepartmentsController::class);
 Route::controller(DepartmentsController::class)->group(function() {
-    Route::get('/dep', 'index');
-    Route::get('/dep/{id}', 'getId');
-    Route::post('/postdep', 'store');
-    Route::post('/updatedep/{id}', 'update');
-    Route::delete('/deletedep/{id}', 'destroy');
+    // Route::get('/dep', 'index');
+    // Route::get('/dep/{id}', 'getId');
+    // Route::post('/postdep', 'store');
+    // Route::post('/updatedep/{id}', 'update');
+    // Route::delete('/deletedep/{id}', 'destroy');
     Route::get('/depmax', 'getMaxId');
     Route::delete('/deldepmulti', 'destroyMultiple');
 });
