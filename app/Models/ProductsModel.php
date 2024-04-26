@@ -6,31 +6,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductsModel extends Model {
-    protected $table = 'Products';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = 'products';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'SerialNumber',
-        'prodNumber',
-        'featuredImageId',
-        'prodName',
-        'prodDescription',
-        'Unit',
-        'prodStock',
-        'prodPurchasePrice',
-        'prodSalePrice',
-        'prodWidth',
-        'prodHeight',
-        'prodDepth',
-        'prodWeight',
-        'prodState',
-        'prodWebHome',
-        'prodCreatedAt',
-        'prodUpdatedAt',
+        'code',
+        'featured',
+        'name',
+        'description',
+        'unit_id',
+        'stock_alert',
+        'purchase_price',
+        'sale_price',
+        'width',
+        'height',
+        'depth',
+        'weight',
+        'web',
+        'status',
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public function categories() {
         return $this->belongsToMany(CategoriesModel::class, 'ProductCategory', 'Product', 'Category')->withPivot('Product', 'Category');
