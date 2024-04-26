@@ -25,11 +25,11 @@ class UsersController extends Controller {
         $uuid = Uuid::uuid4();
         $data = $request->json()->all();
         $user = new UsersModel;
-        $user->id = $data['id'];
-        $user->Employee = $data['Employee'];
-        $user->userDisplayName = $data['userDisplayName'];
-        $user->userPassword = $data['userPassword'];
-        $user->Rol = $data['Rol'];
+        $user->employee_id = $data['employee_id'];
+        $user->display_name = $data['display_name'];
+        $user->display_email = $data['display_email'];
+        $user->password = $data['password'];
+        $user->rol_id = $data['rol_id'];
         $user->uuid = $uuid->toString();
         $user->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
@@ -42,10 +42,11 @@ class UsersController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $user = UsersModel::find($id);
-        $user->Employee = $data['Employee'];
-        $user->userDisplayName = $data['userDisplayName'];
-        $user->userPassword = $data['userPassword'];
-        $user->Rol = $data['Rol'];
+        $user->employee_id = $data['employee_id'];
+        $user->display_name = $data['display_name'];
+        $user->display_email = $data['display_email'];
+        $user->password = $data['password'];
+        $user->rol_id = $data['rol_id'];
         $user->uuid = $data['uuid'];
         $user->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
