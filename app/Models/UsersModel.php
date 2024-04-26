@@ -20,7 +20,7 @@ class UsersModel extends Model {
         'uuid',
     ];
 
-    protected $hiden = ['created_at','updated_at','deleted_at'];
+    protected $hidden = ['created_at','updated_at','deleted_at'];
 
     public function employees() {
         return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id')->with('avatars');
