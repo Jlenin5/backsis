@@ -15,21 +15,39 @@ use GuzzleHttp\Client;
 
 class ProductsController extends Controller {
 
-    public function index() {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->get();
-        $prod->each(function ($product) {
-            $product->categories->each(function ($category) {
-                unset($category->pivot);
-            });
-            $product->warehouses->each(function ($branchOffice) {
-                unset($branchOffice->pivot);
-            });
-        });
-        return $prod;
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        $prod = ProductsModel::with(
+            'categories', 'productImages', 'unit', 'warehouses'
+            )
+            ->whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        // $prod->each(function ($product) {
+        //     $product->categories->each(function ($category) {
+        //         unset($category->pivot);
+        //     });
+        //     $product->warehouses->each(function ($branchOffice) {
+        //         unset($branchOffice->pivot);
+        //     });
+        // });
+
+        $totalRows = ProductsModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $prod,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->findOrFail($id);
+        $prod = ProductsModel::with('categories', 'productImages', 'unit', 'warehouses')->findOrFail($id);
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });
@@ -45,55 +63,51 @@ class ProductsController extends Controller {
     public function store(Request $request) {
         $data = $request->all();
         $validator = Validator::make($data, [
-            'SerialNumber' => 'required',
-            'prodName' => 'required',
-            'prodStock' => 'required|numeric',
-            'prodPurchasePrice' => 'required|numeric',
-            'prodSalePrice' => 'required|numeric',
+            'code' => 'required',
+            'name' => 'required',
+            'stock_alert' => 'required|numeric',
+            'purchase_price' => 'required|numeric',
+            'sale_price' => 'required|numeric',
         ]);
         if ($validator->fails()) {
             return response()->json(['code' => 400, 'status' => 'error', 'message' => 'Datos incompletos o no válidos', 'errors' => $validator->errors()]);
         }
         $prod = new ProductsModel;
-        $prod->id = (int)$data['id'];
-        $prod->SerialNumber = $data['SerialNumber'];
-        $prod->prodNumber = $data['prodNumber'];
-        $prod->featuredImageId = $data['featuredImageId'];
-        $prod->prodName = $data['prodName'];
-        $prod->prodDescription = $data['prodDescription'] === null ? '' : $data['prodDescription'];
-        $prod->Unit = $data['Unit'];
-        $prod->prodStock = $data['prodStock'];
-        $prod->prodPurchasePrice = $data['prodPurchasePrice'];
-        $prod->prodSalePrice = $data['prodSalePrice'];
-        $prod->prodWidth = $data['prodWidth'];
-        $prod->prodHeight = $data['prodHeight'];
-        $prod->prodDepth = $data['prodDepth'];
-        $prod->prodWeight = $data['prodWeight'];
-        $prod->prodState = (bool)$data['prodState'];
-        $prod->prodWebHome = (bool)$data['prodWebHome'];
-        $prod->prodCreatedAt = now();
-        $prod->prodUpdatedAt = now();
+        $prod->code = $data['code'];
+        $prod->featured = $data['featured'];
+        $prod->name = $data['name'];
+        $prod->description = $data['description'];
+        $prod->unit_id = $data['unit_id'];
+        $prod->stock_alert = $data['stock_alert'];
+        $prod->purchase_price = $data['purchase_price'];
+        $prod->sale_price = $data['sale_price'];
+        $prod->width = $data['width'];
+        $prod->height = $data['height'];
+        $prod->depth = $data['depth'];
+        $prod->weight = $data['weight'];
+        $prod->web_site = (bool)$data['web_site'];
+        $prod->status = (bool)$data['status'];
         $prod->save();
 
-        if (isset($request->categories) && is_array($request->categories)) {
-            foreach ($data['categories'] as $categoryId) {
-                $prodCategory = new ProductCategoryModel([
-                    'Product' => $prod->id,
-                    'Category' => $categoryId['id'],
-                ]);
-                $prodCategory->save();
-            }
-        }
+        // if (isset($request->categories) && is_array($request->categories)) {
+        //     foreach ($data['categories'] as $categoryId) {
+        //         $prodCategory = new ProductCategoryModel([
+        //             'Product' => $prod->id,
+        //             'Category' => $categoryId['id'],
+        //         ]);
+        //         $prodCategory->save();
+        //     }
+        // }
 
-        if (isset($request->branch_offices) && is_array($request->branch_offices)) {
-            foreach ($data['branch_offices'] as $branchOfficeId) {
-                $prodBranchOffice = new ProductWarehouseModel([
-                    'Product' => $prod->id,
-                    'BranchOffice' => $branchOfficeId['id'],
-                ]);
-                $prodBranchOffice->save();
-            }
-        }
+        // if (isset($request->branch_offices) && is_array($request->branch_offices)) {
+        //     foreach ($data['branch_offices'] as $branchOfficeId) {
+        //         $prodBranchOffice = new ProductWarehouseModel([
+        //             'Product' => $prod->id,
+        //             'BranchOffice' => $branchOfficeId['id'],
+        //         ]);
+        //         $prodBranchOffice->save();
+        //     }
+        // }
 
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -105,11 +119,11 @@ class ProductsController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->all();
         $validator = Validator::make($data, [
-            'SerialNumber' => 'required',
-            'prodName' => 'required',
-            'prodStock' => 'required|numeric',
-            'prodPurchasePrice' => 'required|numeric',
-            'prodSalePrice' => 'required|numeric',
+            'code' => 'required',
+            'name' => 'required',
+            'stock_alert' => 'required|numeric',
+            'purchase_price' => 'required|numeric',
+            'sale_price' => 'required|numeric',
         ]);
         if ($validator->fails()) {
             return response()->json(['code' => 400, 'status' => 'error', 'message' => 'Datos incompletos o no válidos', 'errors' => $validator->errors()]);
@@ -118,23 +132,20 @@ class ProductsController extends Controller {
         if (!$prod) {
             return response()->json(['code' => 404, 'status' => 'error', 'message' => 'Producto no encontrado']);
         }
-        $prod->SerialNumber = $data['SerialNumber'];
-        $prod->prodNumber = $data['prodNumber'];
-        $prod->featuredImageId = $data['featuredImageId'];
-        $prod->prodName = $data['prodName'];
-        $prod->prodDescription = $data['prodDescription'] === null ? '' : $data['prodDescription'];
-        $prod->Unit = $data['Unit'];
-        $prod->prodStock = $data['prodStock'];
-        $prod->prodPurchasePrice = $data['prodPurchasePrice'];
-        $prod->prodSalePrice = $data['prodSalePrice'];
-        $prod->prodWidth = $data['prodWidth'];
-        $prod->prodHeight = $data['prodHeight'];
-        $prod->prodDepth = $data['prodDepth'];
-        $prod->prodWeight = $data['prodWeight'];
-        $prod->prodState = (bool)$data['prodState'];
-        $prod->prodWebHome = (bool)$data['prodWebHome'];
-        $prod->prodCreatedAt = now();
-        $prod->prodUpdatedAt = now();
+        $prod->code = $data['code'];
+        $prod->featured = $data['featured'];
+        $prod->name = $data['name'];
+        $prod->description = $data['description'] === null ? '' : $data['description'];
+        $prod->unit_id = $data['unit_id'];
+        $prod->stock_alert = $data['stock_alert'];
+        $prod->purchase_price = $data['purchase_price'];
+        $prod->sale_price = $data['sale_price'];
+        $prod->width = $data['width'];
+        $prod->height = $data['height'];
+        $prod->depth = $data['depth'];
+        $prod->weight = $data['weight'];
+        $prod->web_site = (bool)$data['web_site'];
+        $prod->status = (bool)$data['status'];
         $prod->update();
         
         $prod->categories()->detach();

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductImagesModel extends Model {
-    protected $table = "ProductImages";
+    protected $table = "product_image";
     protected $primaryKey = 'id';
     public $timestamps = false;
     use HasFactory;

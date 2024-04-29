@@ -11,7 +11,6 @@ class ProductsModel extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'code',
         'featured',
         'name',
@@ -24,30 +23,26 @@ class ProductsModel extends Model {
         'height',
         'depth',
         'weight',
-        'web',
+        'web_site',
         'status',
     ];
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public function categories() {
-        return $this->belongsToMany(CategoriesModel::class, 'ProductCategory', 'Product', 'Category')->withPivot('Product', 'Category');
+        return $this->belongsToMany(CategoriesModel::class, 'product_category', 'product_id', 'category_id')->withPivot('product_id', 'category_id');
     }
 
     public function productImages() {
-        return $this->hasMany(ProductImagesModel::class, 'Product');
-    }
-
-    public function serialNumber() {
-        return $this->belongsTo(SerialNumberModel::class, 'SerialNumber', 'id');
+        return $this->hasMany(ProductImagesModel::class, 'product_id');
     }
 
     public function unit() {
-        return $this->belongsTo(ProductUnitModel::class, 'Unit', 'id');
+        return $this->belongsTo(UnitModel::class, 'unit_id', 'id');
     }
 
     public function warehouses() {
-        return $this->belongsToMany(WarehousesModel::class, 'ProductWarehouse', 'Product', 'Warehouse')->withPivot('Product', 'Warehouse');
+        return $this->belongsToMany(WarehousesModel::class, 'product_warehouse', 'product_id', 'warehouse_id')->withPivot('product_id', 'warehouse_id');
     }
 
     public function quotes() {
