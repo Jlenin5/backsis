@@ -18,7 +18,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductImagesController;
 use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\ProductUnitController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ProductBranchOfficeController;
 use App\Http\Controllers\QuotationsController;
 use App\Http\Controllers\QuoteDetailsController;
@@ -257,14 +257,14 @@ Route::controller(ProductsController::class)->group(function() {
     Route::delete('/delprodmulti', 'destroyMultiple');
     Route::get('/prodfeatured/{featured}', 'featuredId');
 });
-Route::controller(ProductUnitController::class)->group(function() {
-    Route::get('/prun', 'index');
-    Route::get('/prun/{id}', 'getId');
-    Route::post('/postprun', 'store');
-    Route::put('/updateprun/{id}', 'update');
-    Route::delete('/deleteprun/{id}', 'destroy');
-    Route::get('/prunmax', 'getMaxId');
-    Route::delete('/delprunmulti', 'destroyMultiple');
+Route::controller(UnitController::class)->group(function() {
+    Route::get('/unit', 'index');
+    Route::get('/unit/{id}', 'getId');
+    Route::post('/postunit', 'store');
+    Route::put('/updateunit/{id}', 'update');
+    Route::delete('/deleteunit/{id}', 'destroy');
+    Route::get('/unitmax', 'getMaxId');
+    Route::delete('/delunitmulti', 'destroyMultiple');
 });
 Route::controller(ProductBranchOfficeController::class)->group(function() {
     Route::get('/prbo', 'index');

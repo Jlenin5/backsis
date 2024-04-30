@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductUnitModel;
+use App\Models\UnitModel;
 use Illuminate\Http\Request;
 
-class ProductUnitController extends Controller {
+class UnitController extends Controller {
     public function index() {
-        $prun = ProductUnitModel::get();
+        $prun = UnitModel::get();
         return $prun;
     }
 
     public function getId($id) {
-        $prun = ProductUnitModel::find($id);
+        $prun = UnitModel::find($id);
         if (!$prun) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -21,27 +21,27 @@ class ProductUnitController extends Controller {
 
     public function store(Request $request) {
         $data = $request->json()->all();
-        $prun = new ProductUnitModel;
+        $prun = new UnitModel;
         $prun->id = $data['id'];
         $prun->prunUnit = $data['prunUnit'];
         $prun->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
 
-    public function show(ProductUnitModel $prun) {
+    public function show(UnitModel $prun) {
         return $prun;
     }
 
     public function update(Request $request, $id) {
         $data = $request->json()->all();
-        $prun = ProductUnitModel::find($id);
+        $prun = UnitModel::find($id);
         $prun->prunUnit = $data['prunUnit'];
         $prun->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
 
     public function destroy($id) {
-        $prun = ProductUnitModel::find($id);
+        $prun = UnitModel::find($id);
         if (!$prun) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
@@ -50,7 +50,7 @@ class ProductUnitController extends Controller {
     }
 
     public function getMaxId() {
-        $ultimoId = ProductUnitModel::max('id');
+        $ultimoId = UnitModel::max('id');
         return response()->json(['ultimo_id' => $ultimoId]);
     }
 
@@ -63,7 +63,7 @@ class ProductUnitController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        ProductUnitModel::whereIn('id', $ids)->delete();
+        UnitModel::whereIn('id', $ids)->delete();
         return response()->json([
             'code' => 200,
             'status' => 'success',
