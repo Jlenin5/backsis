@@ -14,7 +14,7 @@ class EmployeeModel extends Model {
     protected $fillable = [
         'id',
         'image',
-        'first_ame',
+        'first_name',
         'second_name',
         'surname',
         'second_surname',
