@@ -7,45 +7,42 @@ use Illuminate\Database\Eloquent\Model;
 
 class WarehousesModel extends Model {
 
-    protected $table = 'Warehouses';
-    protected $primaryKey = 'id';
+    protected $table = 'warehouses';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'whName',
-        'whPhone',
-        'whEmail',
-        'Department',
-        'Province',
-        'District',
-        'whAddress',
-        'User',
-        'whState'
+        'name',
+        'phone',
+        'email',
+        'department_id',
+        'province_id',
+        'district_id',
+        'address',
+        'employee_id',
+        'status'
     ];
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
-
-    protected $dates = ['deleted_at'];
 
     public function products() {
         return $this->belongsToMany(ProductsModel::class, 'ProductWarehouse', 'Warehouse', 'Product')->withPivot('Product', 'BranchOffice');
     }
 
-    public function users() {
-        return $this->belongsTo(UsersModel::class, 'User', 'id')->with('employees');
+    public function employees() {
+        return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id');
     }
 
     public function departments() {
-        return $this->belongsTo(DepartmentsModel::class, 'Department', 'id');
+        return $this->belongsTo(DepartmentsModel::class, 'department_id', 'id');
     }
 
     public function provinces() {
-        return $this->belongsTo(ProvincesModel::class, 'Province', 'id');
+        return $this->belongsTo(ProvincesModel::class, 'province_id', 'id');
     }
 
     public function districts() {
-        return $this->belongsTo(DistrictsModel::class, 'District', 'id');
+        return $this->belongsTo(DistrictsModel::class, 'district_id', 'id');
     }
 
 }

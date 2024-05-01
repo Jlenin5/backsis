@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 class WarehousesController extends Controller {
     public function index() {
-        $wh = WarehousesModel::with('users','departments','provinces','districts')->where('deleted_at',null)->get();
+        $wh = WarehousesModel::with('employees','departments','provinces','districts')->where('deleted_at',null)->get();
         return $wh;
     }
 
     public function getId($id) {
-        $wh = WarehousesModel::with('users','departments','provinces','districts')->where('deleted_at',null)->find($id);
+        $wh = WarehousesModel::with('employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
         if (!$wh) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -22,16 +22,15 @@ class WarehousesController extends Controller {
     public function store(Request $request) {
         $data = $request->json()->all();
         $wh = new WarehousesModel;
-        $wh->id = $data['id'];
-        $wh->whName = $data['whName'];
-        $wh->whPhone = $data['whPhone'];
-        $wh->whEmail = $data['whEmail'];
-        $wh->Department = $data['Department'];
-        $wh->Province = $data['Province'];
-        $wh->District = $data['District'];
-        $wh->whAddress = $data['whAddress'];
-        $wh->User = $data['User'];
-        $wh->whState = $data['whState'];
+        $wh->name = $data['name'];
+        $wh->phone = $data['phone'];
+        $wh->email = $data['email'];
+        $wh->department_id = $data['department_id'];
+        $wh->province_id = $data['province_id'];
+        $wh->district_id = $data['district_id'];
+        $wh->address = $data['address'];
+        $wh->employee_id = $data['employee_id'];
+        $wh->status = $data['status'];
         $wh->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -43,15 +42,15 @@ class WarehousesController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $wh = WarehousesModel::find($id);
-        $wh->whName = $data['whName'];
-        $wh->whPhone = $data['whPhone'];
-        $wh->whEmail = $data['whEmail'];
-        $wh->Department = $data['Department'];
-        $wh->Province = $data['Province'];
-        $wh->District = $data['District'];
-        $wh->whAddress = $data['whAddress'];
-        $wh->User = $data['User'];
-        $wh->whState = $data['whState'];
+        $wh->name = $data['name'];
+        $wh->phone = $data['phone'];
+        $wh->email = $data['email'];
+        $wh->department_id = $data['department_id'];
+        $wh->province_id = $data['province_id'];
+        $wh->district_id = $data['district_id'];
+        $wh->address = $data['address'];
+        $wh->employee_id = $data['employee_id'];
+        $wh->status = $data['status'];
         $wh->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }

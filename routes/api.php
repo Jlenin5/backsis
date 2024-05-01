@@ -366,13 +366,13 @@ Route::controller(UsersController::class)->group(function() {
     Route::delete('/delusermulti', 'destroyMultiple');
 });
 Route::controller(WarehousesController::class)->group(function() {
-    Route::get('/wh', 'index');
-    Route::get('/wh/{id}', 'getId');
-    Route::post('/postwh', 'store');
-    Route::put('/updatewh/{id}', 'update');
-    Route::delete('/deletewh/{id}', 'destroy');
-    Route::get('/whmax', 'getMaxId');
-    Route::delete('/delwhmulti', 'destroyMultiple');
+    Route::get('/warehouse', 'index');
+    Route::get('/warehouse/{id}', 'getId');
+    Route::post('/postwarehouse', 'store');
+    Route::put('/updatewarehouse/{id}', 'update');
+    Route::delete('/deletewarehouse/{id}', 'destroy');
+    Route::get('/warehousemax', 'getMaxId');
+    Route::delete('/delwarehousemulti', 'destroyMultiple');
 });
 Route::controller(WorkAreaController::class)->group(function() {
     Route::get('/wa', 'index');
