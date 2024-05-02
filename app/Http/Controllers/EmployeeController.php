@@ -7,13 +7,25 @@ use Illuminate\Http\Request;
 
 class EmployeeController extends Controller {
 
-    public function index() {
-        $emp = EmployeeModel::with('documentType','avatars','workAreas','jobPositions')->where('deleted_at',null)->get();
-        return $emp;
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $emp = EmployeeModel::with('avatars','workAreas','jobPositions')->where('deleted_at',null)
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = EmployeeModel::whereNull('deleted_at')->count();
+            
+        return response()->json([
+            'data' => $emp,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
-        $emp = EmployeeModel::with('documentType','avatars','workAreas','jobPositions')->where('deleted_at',null)->findOrFail($id);
+        $emp = EmployeeModel::with('avatars','workAreas','jobPositions')->where('deleted_at',null)->findOrFail($id);
         if (!$emp) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
