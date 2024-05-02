@@ -6,9 +6,25 @@ use App\Models\WarehousesModel;
 use Illuminate\Http\Request;
 
 class WarehousesController extends Controller {
-    public function index() {
-        $wh = WarehousesModel::with('employees','departments','provinces','districts')->where('deleted_at',null)->get();
-        return $wh;
+
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $wh = WarehousesModel::with(
+                'employees','departments','provinces','districts'
+            )
+            ->where('deleted_at',null)
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = WarehousesModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $wh,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
