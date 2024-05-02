@@ -6,41 +6,43 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BranchOfficesModel extends Model {
-    protected $table = 'BranchOffices';
-    protected $primaryKey = 'id';
+
+    protected $table = 'branch_offices';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'boName',
-        'boPhone',
-        'boEmail',
-        'Department',
-        'Province',
-        'District',
-        'boAddress',
-        'User',
-        'boState'
+        'name',
+        'phone',
+        'email',
+        'department_id',
+        'province_id',
+        'district_id',
+        'address',
+        'employee_id',
+        'status'
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public function products() {
         return $this->belongsToMany(ProductsModel::class, 'ProductBranchOffice', 'BranchOffice', 'Product')->withPivot('Product', 'BranchOffice');
     }
 
-    public function users() {
-        return $this->belongsTo(UsersModel::class, 'User', 'id')->with('employees');
+    public function employees() {
+        return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id');
     }
 
     public function departments() {
-        return $this->belongsTo(DepartmentsModel::class, 'Department', 'id');
+        return $this->belongsTo(DepartmentsModel::class, 'department_id', 'id');
     }
 
     public function provinces() {
-        return $this->belongsTo(ProvincesModel::class, 'Province', 'id');
+        return $this->belongsTo(ProvincesModel::class, 'province_id', 'id');
     }
 
     public function districts() {
-        return $this->belongsTo(DistrictsModel::class, 'District', 'id');
+        return $this->belongsTo(DistrictsModel::class, 'district_id', 'id');
     }
 
 }
