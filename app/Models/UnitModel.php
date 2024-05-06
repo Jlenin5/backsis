@@ -12,7 +12,11 @@ class UnitModel extends Model {
 
     protected $fillable = [
         'id',
-        'prunUnit',
+        'name',
+        'short_name',
+        'base_unit',
+        'operator',
+        'operator_value',
     ];
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
