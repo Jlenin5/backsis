@@ -7,6 +7,7 @@ use App\Models\ProductCategoryModel;
 use App\Models\ProductImagesModel;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ProductsModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -21,22 +22,26 @@ class ProductsController extends Controller {
 
         $offset = ($page - 1) * $perPage;
 
-        $prod = ProductsModel::with(
-            'categories', 'productImages', 'unit', 'warehouses'
-            )
+        $prod = ProductsModel::with([
+                'categories' => function($query) {
+                    $query->whereNull('product_category.deleted_at');
+                },
+                'productImages', 'unit', 'warehouses'
+            ])
             ->whereNull('deleted_at')
             ->offset($offset)
             ->limit($perPage)
             ->orderBy('created_at', 'desc')
             ->get();
-        // $prod->each(function ($product) {
-        //     $product->categories->each(function ($category) {
-        //         unset($category->pivot);
-        //     });
-        //     $product->warehouses->each(function ($branchOffice) {
-        //         unset($branchOffice->pivot);
-        //     });
-        // });
+
+        $prod->each(function ($product) {
+        $product->categories->each(function ($category) {
+            unset($category->pivot);
+        });
+            // $product->warehouses->each(function ($branchOffice) {
+            //     unset($branchOffice->pivot);
+            // });
+        });
 
         $totalRows = ProductsModel::whereNull('deleted_at')->count();
 
@@ -47,7 +52,12 @@ class ProductsController extends Controller {
     }
 
     public function getId($id) {
-        $prod = ProductsModel::with('categories', 'productImages', 'unit', 'warehouses')->findOrFail($id);
+        $prod = ProductsModel::with([
+            'categories' => function($query) {
+                $query->whereNull('product_category.deleted_at');
+            },
+            'productImages', 'unit', 'warehouses'
+        ])->findOrFail($id);
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });
@@ -76,7 +86,7 @@ class ProductsController extends Controller {
         $prod->code = $data['code'];
         $prod->featured = $data['featured'];
         $prod->name = $data['name'];
-        $prod->description = $data['description'];
+        $prod->description = $data['description'] ?? '';
         $prod->unit_id = $data['unit_id'];
         $prod->stock_alert = $data['stock_alert'];
         $prod->purchase_price = $data['purchase_price'];
@@ -89,21 +99,21 @@ class ProductsController extends Controller {
         $prod->status = (bool)$data['status'];
         $prod->save();
 
-        // if (isset($request->categories) && is_array($request->categories)) {
-        //     foreach ($data['categories'] as $categoryId) {
-        //         $prodCategory = new ProductCategoryModel([
-        //             'Product' => $prod->id,
-        //             'Category' => $categoryId['id'],
-        //         ]);
-        //         $prodCategory->save();
-        //     }
-        // }
+        if (isset($request->categories) && is_array($request->categories)) {
+            foreach ($data['categories'] as $categoryId) {
+                $prodCategory = new ProductCategoryModel([
+                    'product_id' => $prod->id,
+                    'category_id' => $categoryId['id'],
+                ]);
+                $prodCategory->save();
+            }
+        }
 
         // if (isset($request->branch_offices) && is_array($request->branch_offices)) {
         //     foreach ($data['branch_offices'] as $branchOfficeId) {
         //         $prodBranchOffice = new ProductWarehouseModel([
-        //             'Product' => $prod->id,
-        //             'BranchOffice' => $branchOfficeId['id'],
+        //             'product_id' => $prod->id,
+        //             'branch_office_id' => $branchOfficeId['id'],
         //         ]);
         //         $prodBranchOffice->save();
         //     }
@@ -135,7 +145,7 @@ class ProductsController extends Controller {
         $prod->code = $data['code'];
         $prod->featured = $data['featured'];
         $prod->name = $data['name'];
-        $prod->description = $data['description'] === null ? '' : $data['description'];
+        $prod->description = $data['description'] ?? '';
         $prod->unit_id = $data['unit_id'];
         $prod->stock_alert = $data['stock_alert'];
         $prod->purchase_price = $data['purchase_price'];
@@ -148,19 +158,43 @@ class ProductsController extends Controller {
         $prod->status = (bool)$data['status'];
         $prod->update();
         
-        $prod->categories()->detach();
-        if (isset($data['categories']) && is_array($data['categories'])) {
-            foreach ($data['categories'] as $categoryId) {
-                $prod->categories()->attach($categoryId['id']);
+        // Obtener las categorías enviadas desde el front
+        $categories = $request->input('categories', []);
+        // Obtener las categorías existentes del producto
+        $existingCategories = $prod->categories->pluck('id')->toArray();
+        // Recorrer las categorías enviadas desde el front
+        foreach ($categories as $category) {
+            // Verificar si la categoría ya existe en el producto
+            if (!in_array($category['id'], $existingCategories)) {
+                // Si no existe, crear una nueva entrada en product_category
+                ProductCategoryModel::create([
+                    'product_id' => $prod->id,
+                    'category_id' => $category['id'],
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+            } else {
+                // Si existe y está marcada como eliminada, actualizar deleted_at a null
+                $existingCategory = ProductCategoryModel::where('product_id', $prod->id)
+                    ->where('category_id', $category['id'])
+                    ->whereNotNull('deleted_at')
+                    ->first();
+                if ($existingCategory) {
+                    $existingCategory->deleted_at = null;
+                    $existingCategory->update();
+                }
             }
         }
+        // Marcar las categorías que no fueron enviadas desde el front como eliminadas
+        $deletedCategories = array_diff($existingCategories, array_column($categories, 'id'));
+        ProductCategoryModel::whereIn('category_id', $deletedCategories)->update(['deleted_at' => Carbon::now()]);
 
-        $prod->warehouses()->detach();
-        if (isset($data['branch_offices']) && is_array($data['branch_offices'])) {
-            foreach ($data['branch_offices'] as $branchOfficeId) {
-                $prod->warehouses()->attach($branchOfficeId['id']);
-            }
-        }
+        // $prod->warehouses()->detach();
+        // if (isset($data['branch_offices']) && is_array($data['branch_offices'])) {
+        //     foreach ($data['branch_offices'] as $branchOfficeId) {
+        //         $prod->warehouses()->attach($branchOfficeId['id']);
+        //     }
+        // }
 
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado correctamente']);
     }
