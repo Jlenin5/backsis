@@ -251,7 +251,7 @@ Route::controller(ProductsController::class)->group(function() {
     Route::get('/prod', 'index');
     Route::get('/prod/{id}', 'getId');
     Route::post('/postprod', 'store');
-    Route::put('/updateprod/{id}', 'update');
+    Route::post('/updateprod', 'update');
     Route::delete('/deleteprod/{id}', 'destroy');
     Route::get('/prodmax', 'getMaxId');
     Route::delete('/delprodmulti', 'destroyMultiple');

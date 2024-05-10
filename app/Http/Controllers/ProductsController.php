@@ -72,35 +72,43 @@ class ProductsController extends Controller {
 
     public function store(Request $request) {
         $data = $request->all();
-        $validator = Validator::make($data, [
-            'code' => 'required',
-            'name' => 'required',
-            'stock_alert' => 'required|numeric',
-            'purchase_price' => 'required|numeric',
-            'sale_price' => 'required|numeric',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['code' => 400, 'status' => 'error', 'message' => 'Datos incompletos o no válidos', 'errors' => $validator->errors()]);
-        }
+        $product_data = json_decode($data['productData'], true);
         $prod = new ProductsModel;
-        $prod->code = $data['code'];
-        $prod->featured = $data['featured'];
-        $prod->name = $data['name'];
-        $prod->description = $data['description'] ?? '';
-        $prod->unit_id = $data['unit_id'];
-        $prod->stock_alert = $data['stock_alert'];
-        $prod->purchase_price = $data['purchase_price'];
-        $prod->sale_price = $data['sale_price'];
-        $prod->width = $data['width'];
-        $prod->height = $data['height'];
-        $prod->depth = $data['depth'];
-        $prod->weight = $data['weight'];
-        $prod->web_site = (bool)$data['web_site'];
-        $prod->status = (bool)$data['status'];
+        $prod->code = $product_data['code'];
+        $prod->featured = $product_data['featured'];
+        $prod->name = $product_data['name'];
+        $prod->description = $product_data['description'] ?? '';
+        $prod->unit_id = $product_data['unit_id'];
+        $prod->stock_alert = $product_data['stock_alert'];
+        $prod->purchase_price = $product_data['purchase_price'];
+        $prod->sale_price = $product_data['sale_price'];
+        $prod->width = $product_data['width'];
+        $prod->height = $product_data['height'];
+        $prod->depth = $product_data['depth'];
+        $prod->weight = $product_data['weight'];
+        $prod->web_site = (bool)$product_data['web_site'];
+        $prod->status = (bool)$product_data['status'];
         $prod->save();
 
-        if (isset($request->categories) && is_array($request->categories)) {
-            foreach ($data['categories'] as $categoryId) {
+        if (isset($request->product_images) && is_array($request->product_images)) {
+            foreach ($request->product_images as $index => $imageData) {
+                if (isset($imageData['path'])) {
+                    $file = $imageData['path'];
+                    $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path("images/products/"), $fileName);
+
+                    $productImage = new ProductImagesModel([
+                        'path' => $fileName,
+                        'product_id' => $prod->id,
+                        'featured' => $imageData['featured']
+                    ]);
+                    $productImage->save();
+                }
+            }
+        }
+
+        if (isset($product_data['categories']) && is_array($product_data['categories'])) {
+            foreach ($product_data['categories'] as $categoryId) {
                 $prodCategory = new ProductCategoryModel([
                     'product_id' => $prod->id,
                     'category_id' => $categoryId['id'],
@@ -109,16 +117,6 @@ class ProductsController extends Controller {
             }
         }
 
-        // if (isset($request->branch_offices) && is_array($request->branch_offices)) {
-        //     foreach ($data['branch_offices'] as $branchOfficeId) {
-        //         $prodBranchOffice = new ProductWarehouseModel([
-        //             'product_id' => $prod->id,
-        //             'branch_office_id' => $branchOfficeId['id'],
-        //         ]);
-        //         $prodBranchOffice->save();
-        //     }
-        // }
-
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
 
@@ -126,40 +124,56 @@ class ProductsController extends Controller {
         return $prod;
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request) {
         $data = $request->all();
-        $validator = Validator::make($data, [
-            'code' => 'required',
-            'name' => 'required',
-            'stock_alert' => 'required|numeric',
-            'purchase_price' => 'required|numeric',
-            'sale_price' => 'required|numeric',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['code' => 400, 'status' => 'error', 'message' => 'Datos incompletos o no válidos', 'errors' => $validator->errors()]);
-        }
-        $prod = ProductsModel::find($id);
+        $product_data = json_decode($data['productData'], true);
+        $prod = ProductsModel::find($product_data['id']);
         if (!$prod) {
             return response()->json(['code' => 404, 'status' => 'error', 'message' => 'Producto no encontrado']);
         }
-        $prod->code = $data['code'];
-        $prod->featured = $data['featured'];
-        $prod->name = $data['name'];
-        $prod->description = $data['description'] ?? '';
-        $prod->unit_id = $data['unit_id'];
-        $prod->stock_alert = $data['stock_alert'];
-        $prod->purchase_price = $data['purchase_price'];
-        $prod->sale_price = $data['sale_price'];
-        $prod->width = $data['width'];
-        $prod->height = $data['height'];
-        $prod->depth = $data['depth'];
-        $prod->weight = $data['weight'];
-        $prod->web_site = (bool)$data['web_site'];
-        $prod->status = (bool)$data['status'];
+        $prod->code = $product_data['code'];
+        $prod->featured = $product_data['featured'];
+        $prod->name = $product_data['name'];
+        $prod->description = $product_data['description'] ?? '';
+        $prod->unit_id = $product_data['unit_id'];
+        $prod->stock_alert = $product_data['stock_alert'];
+        $prod->purchase_price = $product_data['purchase_price'];
+        $prod->sale_price = $product_data['sale_price'];
+        $prod->width = $product_data['width'];
+        $prod->height = $product_data['height'];
+        $prod->depth = $product_data['depth'];
+        $prod->weight = $product_data['weight'];
+        $prod->web_site = (bool)$product_data['web_site'];
+        $prod->status = (bool)$product_data['status'];
         $prod->update();
+
+        if (isset($request->product_images) && is_array($request->product_images)) {
+            foreach ($request->product_images as $index => $imageData) {
+                if (isset($imageData['path'])) {
+                    // Verificar si ya existe una imagen con el mismo 'featured'
+                    $existingImage = ProductImagesModel::where('featured', $imageData['featured'])->first();
+                    if (!$existingImage) {
+                        $file = $imageData['path'];
+                        $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path("images/products/"), $fileName);
+    
+                        $productImage = new ProductImagesModel([
+                            'path' => $fileName,
+                            'product_id' => $prod->id,
+                            'featured' => $imageData['featured']
+                        ]);
+                        $productImage->save();
+                    }
+                }
+                $existingImages = ProductImagesModel::where('product_id', $prod->id)->get()->pluck('featured')->toArray();
+                // Eliminar imágenes existentes que no están presentes en las nuevas imágenes
+                $imagesToDelete = array_diff($existingImages, array_column($request->product_images, 'featured'));
+                ProductImagesModel::whereIn('featured', $imagesToDelete)->update(['deleted_at' => now()]);
+            }
+        }
         
         // Obtener las categorías enviadas desde el front
-        $categories = $request->input('categories', []);
+        $categories = $product_data['categories'] ?? [];
         // Obtener las categorías existentes del producto
         $existingCategories = $prod->categories->pluck('id')->toArray();
         // Recorrer las categorías enviadas desde el front
@@ -170,8 +184,6 @@ class ProductsController extends Controller {
                 ProductCategoryModel::create([
                     'product_id' => $prod->id,
                     'category_id' => $category['id'],
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
                 ]);
             } else {
                 // Si existe y está marcada como eliminada, actualizar deleted_at a null
@@ -188,13 +200,6 @@ class ProductsController extends Controller {
         // Marcar las categorías que no fueron enviadas desde el front como eliminadas
         $deletedCategories = array_diff($existingCategories, array_column($categories, 'id'));
         ProductCategoryModel::whereIn('category_id', $deletedCategories)->update(['deleted_at' => Carbon::now()]);
-
-        // $prod->warehouses()->detach();
-        // if (isset($data['branch_offices']) && is_array($data['branch_offices'])) {
-        //     foreach ($data['branch_offices'] as $branchOfficeId) {
-        //         $prod->warehouses()->attach($branchOfficeId['id']);
-        //     }
-        // }
 
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado correctamente']);
     }
