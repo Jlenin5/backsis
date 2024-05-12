@@ -19,7 +19,7 @@ class ReportsController extends Controller {
         $warehouses = WarehousesModel::whereNull('deleted_at')->get(['id', 'name']);
         $warehouses_id = WarehousesModel::whereNull('deleted_at')->pluck('id')->toArray();
 
-        $companies = WarehousesModel::where('deleted_at', '=', null)->get(['id', 'name']);
+        $branch_offices = WarehousesModel::where('deleted_at', '=', null)->get(['id', 'name']);
 
         $products_data = ProductsModel::with([
                 'categories', 'productImages', 'unit', 'warehouses'
@@ -38,16 +38,16 @@ class ReportsController extends Controller {
             $item['name'] = $product->name;
             
             $current_stock = ProductWarehouseModel::where('product_id', $product->id)
-                ->where('deleted_at', '=', null)
+                ->whereNull('deleted_at')
                 ->whereIn('warehouse_id', $warehouses_id)
-                // ->when($request->filled('warehouse_id'), function ($query) use ($request)  {
-                //     $query->where('warehouse_id', $request->warehouse_id);
-                //    })
-                //    ->when($request->filled('company_id'), function ($query) use ($request){
-                //     $query->whereHas('warehouse', function ($query) use ($request){
-                //             $query->where('company_id',  $request->company_id);
-                //          });
-                //     })
+                ->when($request->filled('warehouse_id'), function ($query) use ($request)  {
+                    $query->where('warehouse_id', $request->warehouse_id);
+                   })
+                   ->when($request->filled('branch_office_id'), function ($query) use ($request){
+                    $query->whereHas('warehouse', function ($query) use ($request){
+                            $query->where('branch_office_id',  $request->branch_office_id);
+                         });
+                    })
                 ->sum('quantity');
             
             $item['reserve'] = $product->reserveStock();
@@ -56,12 +56,12 @@ class ReportsController extends Controller {
             if (count($reserveStock) > 0) {
                 $totalreserve=0;
                 foreach ($reserveStock as $reserve) {
-                    if ($request['company_id']) {
+                    if ($request['branch_office_id']) {
                         if ($request['warehouse_id']) {
                             if ($reserve->warehouse_id == $request['warehouse_id']) {
                                 $totalreserve = $reserve->total;
                             }
-                        } else if ($reserve->company_id == $request['company_id']) {
+                        } else if ($reserve->branch_office_id == $request['branch_office_id']) {
                             $totalreserve += $reserve->total;
                         }
                     } else if ($request['warehouse_id']) {
@@ -72,10 +72,9 @@ class ReportsController extends Controller {
                         $totalreserve += $reserve->total;
                     }
                 }
-                $item['reserveStock'] =  $totalreserve. ' ' . $product['unit']->short_name ;
-
+                $item['reserve_stock'] =  $totalreserve. ' ' . $product['unit']->short_name;
             } else {
-                $item['reserveStock'] = "";
+                $item['reserve_stock'] = "";
             }
 
             $item['quantity'] = $current_stock .' '.$product['unit']->short_name;
@@ -87,7 +86,7 @@ class ReportsController extends Controller {
             'report' => $data,
             'totalRows' => $totalRows,
             'warehouses' => $warehouses,
-            'companies'=> $companies
+            'branch_offices'=> $branch_offices
         ]);
     }
 
