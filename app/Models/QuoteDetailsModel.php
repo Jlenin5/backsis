@@ -6,15 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class QuoteDetailsModel extends Model {
-    protected $table = 'QuoteDetails';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = 'quote_details';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'Product',
-        'Quotation',
+        'product_id',
+        'quote_id',
         'qtdQuantity',
         'qtdSubtotal',
         'qtdTotal',

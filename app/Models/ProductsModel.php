@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,5 +48,25 @@ class ProductsModel extends Model {
 
     public function quotes() {
         return $this->belongsToMany(QuotationsModel::class, 'QuoteDetails', 'Product', 'Quotation')->withPivot('Quotation', 'Product');
+    }
+
+    public function reserveStock() {
+        $today = Carbon::today();
+        // $ocpc=Sale::select('ocpc')->wherenotnull('ocpc')->get()->pluck('ocpc');
+        $reserve = QuotationsModel::whereHas("quote_details", function ($query) {
+                $query->where('product_id', $this->id);
+            })
+            ->whereHas('details.quotation', function ($query) use ($today) {
+                $query->whereDate('due_date', '>=', $today);
+                $query->where('status', '<>' ,1);
+            })
+            // ->Wherenotin('ocpc',$ocpc)
+            ->join('quote_details', 'quote_details.quote_id', '=', 'quotations.id')
+            ->join('warehouses', 'warehouses.id', '=', 'quotations.warehouse_id')
+            ->where('quote_details.product_id',$this->id)
+            ->groupBy('quotations.warehouse_id')
+            ->selectRaw('sum(quote_details.quantity) as total, quotations.warehouse_id,warehouses.branch_office_id');
+
+        return $reserve->get();
     }
 }

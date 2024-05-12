@@ -34,6 +34,7 @@ use App\Http\Controllers\CarriersController;
 use App\Http\Controllers\JobPositionController;
 use App\Http\Controllers\MobilitiesController;
 use App\Http\Controllers\PurchaseOrdersController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\TaxesController;
 use App\Http\Controllers\WarehousesController;
 use App\Http\Controllers\UbigeoController;
@@ -301,6 +302,9 @@ Route::controller(QuoteDetailsController::class)->group(function() {
     Route::delete('/deleteqtd/{id}', 'destroy');
     Route::get('/qtdmax', 'getMaxId');
     Route::delete('/delqtdmulti', 'destroyMultiple');
+});
+Route::controller(ReportsController::class)->group(function() {
+    Route::get('/stock_report', 'stock_report');
 });
 Route::controller(RolesController::class)->group(function() {
     Route::get('/rol', 'index');

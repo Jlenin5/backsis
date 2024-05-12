@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class QuotationsModel extends Model {
-    protected $table = 'Quotations';
-    protected $primaryKey = 'id';
+    
+    protected $table = 'quotations';
     use HasFactory;
 
     protected $fillable = [
@@ -26,8 +26,8 @@ class QuotationsModel extends Model {
         'qtDeletedAt',
     ];
 
-    public function quoteDetails() {
-        return $this->hasMany(QuoteDetailsModel::class, 'Quotation');
+    public function quote_details() {
+        return $this->hasMany(QuoteDetailsModel::class, 'quote_id');
     }
 
     public function serialNumber() {
