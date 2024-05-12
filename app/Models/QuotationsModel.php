@@ -12,45 +12,37 @@ class QuotationsModel extends Model {
 
     protected $fillable = [
         'id',
-        'SerialNumber',
-        'qtNumber',
-        'Currency',
-        'Company',
-        'BranchOffice',
-        'Client',
-        'User',
-        'qtSubtotal',
-        'qtIgv',
-        'qtTotal',
-        'qtCreatedAt',
-        'qtDeletedAt',
+        'code',
+        'warehouse_id',
+        'client_id',
+        'employee_id',
+        'start_date',
+        'due_date',
+        'discount',
+        'shipping',
+        'tax_rate',
+        'tax_nate',
+        'sub_total',
+        'total',
+        'status',
+        'is_accepted'
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     public function quote_details() {
         return $this->hasMany(QuoteDetailsModel::class, 'quote_id');
     }
 
-    public function serialNumber() {
-        return $this->belongsTo(SerialNumberModel::class, 'SerialNumber', 'id');
-    }
-
-    public function currencies() {
-        return $this->belongsTo(CurrenciesModel::class, 'Currency', 'id');
-    }
-
-    public function companies() {
-        return $this->belongsTo(CompanyModel::class, 'Company', 'id');
-    }
-
-    public function branchOffices() {
-        return $this->belongsTo(BranchOfficesModel::class, 'BranchOffice', 'id');
+    public function warehouses() {
+        return $this->belongsTo(WarehousesModel::class, 'warehouse_id', 'id');
     }
 
     public function clients() {
-        return $this->belongsTo(ClientsModel::class, 'Client', 'id');
+        return $this->belongsTo(ClientsModel::class, 'client_id', 'id');
     }
 
-    public function users() {
-        return $this->belongsTo(UsersModel::class, 'User', 'id')->with('employees');
+    public function employees() {
+        return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id');
     }
 }

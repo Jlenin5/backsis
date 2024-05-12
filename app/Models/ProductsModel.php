@@ -56,7 +56,7 @@ class ProductsModel extends Model {
         $reserve = QuotationsModel::whereHas("quote_details", function ($query) {
                 $query->where('product_id', $this->id);
             })
-            ->whereHas('details.quotation', function ($query) use ($today) {
+            ->whereHas('quote_details.quotation', function ($query) use ($today) {
                 $query->whereDate('due_date', '>=', $today);
                 $query->where('status', '<>' ,1);
             })
