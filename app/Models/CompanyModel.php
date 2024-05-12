@@ -6,20 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyModel extends Model {
-    protected $table = 'Company';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = 'companies';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'comCode',
-        'comImage',
-        'comName',
-        'comRUC',
-        'comEmail',
-        'comAddress',
-        'comWebSite',
-        'comPhone',
+        'code',
+        'image',
+        'name',
+        'document_number',
+        'email',
+        'address',
+        'web_site',
+        'phone',
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 }
