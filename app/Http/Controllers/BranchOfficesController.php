@@ -12,7 +12,7 @@ class BranchOfficesController extends Controller {
         $perPage = $request->query('per_page', 10);
         $offset = ($page - 1) * $perPage;
         $bo = BranchOfficesModel::with(
-                'employees','departments','provinces','districts'
+                'companies','employees','departments','provinces','districts'
             )
             ->where('deleted_at',null)
             ->offset($offset)
@@ -28,7 +28,7 @@ class BranchOfficesController extends Controller {
     }
 
     public function getId($id) {
-        $bo = BranchOfficesModel::with('employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
+        $bo = BranchOfficesModel::with('companies','employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
         if (!$bo) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -41,6 +41,7 @@ class BranchOfficesController extends Controller {
         $bo->name = $data['name'];
         $bo->phone = $data['phone'];
         $bo->email = $data['email'];
+        $bo->company_id = $data['company_id'];
         $bo->department_id = $data['department_id'];
         $bo->province_id = $data['province_id'];
         $bo->district_id = $data['district_id'];
@@ -61,6 +62,7 @@ class BranchOfficesController extends Controller {
         $bo->name = $data['name'];
         $bo->phone = $data['phone'];
         $bo->email = $data['email'];
+        $bo->company_id = $data['company_id'];
         $bo->department_id = $data['department_id'];
         $bo->province_id = $data['province_id'];
         $bo->district_id = $data['district_id'];

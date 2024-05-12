@@ -15,6 +15,7 @@ class BranchOfficesModel extends Model {
         'name',
         'phone',
         'email',
+        'company_id',
         'department_id',
         'province_id',
         'district_id',
@@ -27,6 +28,10 @@ class BranchOfficesModel extends Model {
 
     public function products() {
         return $this->belongsToMany(ProductsModel::class, 'ProductBranchOffice', 'BranchOffice', 'Product')->withPivot('Product', 'BranchOffice');
+    }
+
+    public function companies() {
+        return $this->belongsTo(CompanyModel::class, 'company_id', 'id');
     }
 
     public function employees() {
