@@ -12,7 +12,7 @@ class WarehousesController extends Controller {
         $perPage = $request->query('per_page', 10);
         $offset = ($page - 1) * $perPage;
         $wh = WarehousesModel::with(
-                'employees','departments','provinces','districts'
+                'branch_offices','employees','departments','provinces','districts'
             )
             ->where('deleted_at',null)
             ->offset($offset)
@@ -28,7 +28,7 @@ class WarehousesController extends Controller {
     }
 
     public function getId($id) {
-        $wh = WarehousesModel::with('employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
+        $wh = WarehousesModel::with('branch_offices','employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
         if (!$wh) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -41,6 +41,7 @@ class WarehousesController extends Controller {
         $wh->name = $data['name'];
         $wh->phone = $data['phone'];
         $wh->email = $data['email'];
+        $wh->branch_office_id = $data['branch_office_id'];
         $wh->department_id = $data['department_id'];
         $wh->province_id = $data['province_id'];
         $wh->district_id = $data['district_id'];
@@ -61,6 +62,7 @@ class WarehousesController extends Controller {
         $wh->name = $data['name'];
         $wh->phone = $data['phone'];
         $wh->email = $data['email'];
+        $wh->branch_office_id = $data['branch_office_id'];
         $wh->department_id = $data['department_id'];
         $wh->province_id = $data['province_id'];
         $wh->district_id = $data['district_id'];
