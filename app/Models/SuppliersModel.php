@@ -6,22 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SuppliersModel extends Model {
-    protected $table = 'Suppliers';
-    protected $primaryKey = 'id';
+
+    protected $table = 'suppliers';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'DocumentType',
-        'suppDocument',
-        'suppCompanyName',
-        'suppEmail',
-        'suppAddress',
-        'suppPhone',
-        'suppState',
+        'document_type',
+        'document_number',
+        'name',
+        'email',
+        'address',
+        'phone',
+        'status'
     ];
 
-    public function documentType() {
-        return $this->belongsTo(DocumentTypesModel::class, 'DocumentType');
-    }
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 }

@@ -17,31 +17,24 @@ class PurchaseOrdersController extends Controller {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
         $searchText = $request->query('search_text');
-
         $offset = ($page - 1) * $perPage;
-
         $query = PurchaseOrdersModel::with(
-            'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
-        )
-        ->whereNull('deleted_at');
+                'purchase_order_details','warehouses','suppliers','employees'
+            )
+            ->whereNull('deleted_at');
 
         if ($searchText) {
             $query->where(function ($query) use ($searchText) {
-                $query->where('puorNumber', 'LIKE', "%{$searchText}%")
-                        ->orWhereHas('currencies', function ($query) use ($searchText) {
-                            $query->where('curName', 'LIKE', "%{$searchText}%");
-                        })
+                $query->where('code', 'LIKE', "%{$searchText}%")
                         ->orWhereHas('suppliers', function ($query) use ($searchText) {
-                            $query->where('suppCompanyName', 'LIKE', "%{$searchText}%");
+                            $query->where('name', 'LIKE', "%{$searchText}%");
                         })
-                        ->orWhereHas('users.employees', function ($query) use ($searchText) {
-                            $query->where(function ($query) use ($searchText) {
-                                $query->where('empFirstName', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSecondName', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSurname', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSecondSurname', 'LIKE', "%{$searchText}%")
-                                      ->orWhereRaw("CONCAT(empFirstName, ' ', empSecondName, ' ', empSurname, ' ', empSecondSurname) LIKE ?", ["%{$searchText}%"]);
-                            });
+                        ->orWhereHas('employees', function ($query) use ($searchText) {
+                            $query->where('first_name', 'LIKE', "%{$searchText}%")
+                                ->orWhere('second_name', 'LIKE', "%{$searchText}%")
+                                ->orWhere('surname', 'LIKE', "%{$searchText}%")
+                                ->orWhere('second_surname', 'LIKE', "%{$searchText}%")
+                                ->orWhereRaw("CONCAT(first_name, ' ', second_name, ' ', surname, ' ', second_surname) LIKE ?", ["%{$searchText}%"]);
                         });
             });
         }
@@ -60,7 +53,7 @@ class PurchaseOrdersController extends Controller {
     }
 
     public function getId($id) {
-        $puor = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->where('deleted_at',null)->findOrFail($id);
+        $puor = PurchaseOrdersModel::with('purchase_order_details','currencies','warehouses','suppliers','employees')->where('deleted_at',null)->findOrFail($id);
         if (!$puor) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -69,33 +62,29 @@ class PurchaseOrdersController extends Controller {
 
     public function store(Request $request) {
         $data = $request->json()->all();
-        $startDate = Carbon::parse($data['puorStartDate']);
-        $endDate = Carbon::parse($data['puorEndDate']);
+        $date = Carbon::parse($data['date']);
+        $date_approved = Carbon::parse($data['date_approved']);
         $puor = new PurchaseOrdersModel;
-        $puor->id = $data['id'];
-        $puor->SerialNumber = $data['SerialNumber'];
-        $puor->puorNumber = $data['puorNumber'];
-        $puor->Currency = $data['Currency'];
-        $puor->Company = $data['Company'];
-        $puor->Warehouse = $data['Warehouse'];
-        $puor->Supplier = $data['Supplier'];
-        $puor->User = $data['User'];
-        $puor->puorStartDate = $startDate->format('Y-m-d');
-        $puor->puorEndDate = $endDate->format('Y-m-d');
-        $puor->puorSubtotal = $data['puorSubtotal'];
-        $puor->puorTax = $data['puorTax'];
-        $puor->puorTotal = $data['puorTotal'];
+        $puor->code = $data['code'];
+        $puor->warehouse_id = $data['warehouse_id'];
+        $puor->supplier_id = $data['supplier_id'];
+        $puor->employee_id = $data['employee_id'];
+        $puor->supplier_document = $data['supplier_document'];
+        $puor->date = $date->format('Y-m-d');
+        $puor->discount = $data['discount'];
+        $puor->sub_total = $data['sub_total'];
+        $puor->total = $data['total'];
+        $puor->status = $data['status'];
+        $puor->is_approved = $data['is_approved'];
+        $puor->date_approved = $date_approved->format('Y-m-d');
         $puor->save();
-        foreach($data['purchase_order_details'] as $prodDetail) {
+        foreach($data['purchase_order_details'] as $detail) {
             $puorDetail = new PurchaseOrderDetailsModel([
-                'Product' => $prodDetail['id'],
-                'PurchaseOrder' => $data['id'],
-                'podPrice' => $prodDetail['podPrice'],
-                'podTax' => $prodDetail['podTax'],
-                'podDiscountMethod' => $prodDetail['podDiscountMethod'],
-                'podDiscount' => $prodDetail['podDiscount'],
-                'podQuantity' => $prodDetail['podQuantity'],
-                'podTotal' => $prodDetail['podTotal']
+                'product_id' => $detail['product_id'],
+                'purchase_order_id' => $puor->id,
+                'price' => $detail['price'],
+                'quantity' => $detail['quantity'],
+                'total' => $detail['total']
             ]);
             $puorDetail->save();
         }
@@ -108,21 +97,21 @@ class PurchaseOrdersController extends Controller {
 
     public function update(Request $request, $id) {
         $data = $request->json()->all();
-        $startDate = Carbon::parse($data['puorStartDate']);
-        $endDate = Carbon::parse($data['puorEndDate']);
+        $date = Carbon::parse($data['date']);
+        $date_approved = Carbon::parse($data['date_approved']);
         $puor = PurchaseOrdersModel::find($id);
-        $puor->SerialNumber = $data['SerialNumber'];
-        $puor->puorNumber = $data['puorNumber'];
-        $puor->Currency = $data['Currency'];
-        $puor->Company = $data['Company'];
-        $puor->Warehouse = $data['Warehouse'];
-        $puor->Supplier = $data['Supplier'];
-        $puor->User = $data['User'];
-        $puor->puorStartDate = $startDate->format('Y-m-d');
-        $puor->puorEndDate = $endDate->format('Y-m-d');
-        $puor->puorSubtotal = $data['puorSubtotal'];
-        $puor->puorTax = $data['puorTax'];
-        $puor->puorTotal = $data['puorTotal'];
+        $puor->code = $data['code'];
+        $puor->warehouse_id = $data['warehouse_id'];
+        $puor->supplier_id = $data['supplier_id'];
+        $puor->employee_id = $data['employee_id'];
+        $puor->supplier_document = $data['supplier_document'];
+        $puor->date = $date->format('Y-m-d');
+        $puor->discount = $data['discount'];
+        $puor->sub_total = $data['sub_total'];
+        $puor->total = $data['total'];
+        $puor->status = $data['status'];
+        $puor->is_approved = $data['is_approved'];
+        $puor->date_approved = $date_approved->format('Y-m-d');
         $puor->update();
         if (isset($data['purchase_order_details']) && is_array($data['purchase_order_details'])) {
             foreach ($data['purchase_order_details'] as $pod) {
@@ -207,27 +196,25 @@ class PurchaseOrdersController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         $query = PurchaseOrdersModel::with(
-            'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+            'purchase_order_details','warehouses','suppliers','employees'
         )
         ->whereNull('deleted_at');
 
         if ($searchText) {
             $query->where(function ($query) use ($searchText) {
-                $query->where('puorNumber', 'LIKE', "%{$searchText}%")
+                $query->where('code', 'LIKE', "%{$searchText}%")
                         ->orWhereHas('currencies', function ($query) use ($searchText) {
                             $query->where('curName', 'LIKE', "%{$searchText}%");
                         })
                         ->orWhereHas('suppliers', function ($query) use ($searchText) {
-                            $query->where('suppCompanyName', 'LIKE', "%{$searchText}%");
+                            $query->where('name', 'LIKE', "%{$searchText}%");
                         })
-                        ->orWhereHas('users.employees', function ($query) use ($searchText) {
-                            $query->where(function ($query) use ($searchText) {
-                                $query->where('empFirstName', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSecondName', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSurname', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSecondSurname', 'LIKE', "%{$searchText}%")
-                                      ->orWhereRaw("CONCAT(empFirstName, ' ', empSecondName, ' ', empSurname, ' ', empSecondSurname) LIKE ?", ["%{$searchText}%"]);
-                            });
+                        ->orWhereHas('employees', function ($query) use ($searchText) {
+                            $query->where('first_name', 'LIKE', "%{$searchText}%")
+                                ->orWhere('second_name', 'LIKE', "%{$searchText}%")
+                                ->orWhere('surname', 'LIKE', "%{$searchText}%")
+                                ->orWhere('second_surname', 'LIKE', "%{$searchText}%")
+                                ->orWhereRaw("CONCAT(first_name, ' ', second_name, ' ', surname, ' ', second_surname) LIKE ?", ["%{$searchText}%"]);
                         });
             });
         }
@@ -252,27 +239,25 @@ class PurchaseOrdersController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         $query = PurchaseOrdersModel::with(
-            'purchaseOrderDetails', 'serialNumber', 'currencies', 'companies', 'warehouses', 'suppliers', 'users'
+            'purchase_order_details','warehouses','suppliers','employees'
         )
         ->whereNull('deleted_at');
 
         if ($searchText) {
             $query->where(function ($query) use ($searchText) {
-                $query->where('puorNumber', 'LIKE', "%{$searchText}%")
+                $query->where('code', 'LIKE', "%{$searchText}%")
                         ->orWhereHas('currencies', function ($query) use ($searchText) {
                             $query->where('curName', 'LIKE', "%{$searchText}%");
                         })
                         ->orWhereHas('suppliers', function ($query) use ($searchText) {
-                            $query->where('suppCompanyName', 'LIKE', "%{$searchText}%");
+                            $query->where('name', 'LIKE', "%{$searchText}%");
                         })
-                        ->orWhereHas('users.employees', function ($query) use ($searchText) {
-                            $query->where(function ($query) use ($searchText) {
-                                $query->where('empFirstName', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSecondName', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSurname', 'LIKE', "%{$searchText}%")
-                                      ->orWhere('empSecondSurname', 'LIKE', "%{$searchText}%")
-                                      ->orWhereRaw("CONCAT(empFirstName, ' ', empSecondName, ' ', empSurname, ' ', empSecondSurname) LIKE ?", ["%{$searchText}%"]);
-                            });
+                        ->orWhereHas('employees', function ($query) use ($searchText) {
+                            $query->where('first_name', 'LIKE', "%{$searchText}%")
+                                ->orWhere('second_name', 'LIKE', "%{$searchText}%")
+                                ->orWhere('surname', 'LIKE', "%{$searchText}%")
+                                ->orWhere('second_surname', 'LIKE', "%{$searchText}%")
+                                ->orWhereRaw("CONCAT(first_name, ' ', second_name, ' ', surname, ' ', second_surname) LIKE ?", ["%{$searchText}%"]);
                         });
             });
         }
@@ -287,7 +272,7 @@ class PurchaseOrdersController extends Controller {
     }
 
     public function exportPDFId($id) {
-        $purchase_order = PurchaseOrdersModel::with('purchaseOrderDetails','serialNumber','currencies','companies','warehouses','suppliers','users')->where('deleted_at',null)->findOrFail($id);
+        $purchase_order = PurchaseOrdersModel::with('purchase_order_details','warehouses','suppliers','employees')->where('deleted_at',null)->findOrFail($id);
         if (!$purchase_order) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }

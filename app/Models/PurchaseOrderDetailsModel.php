@@ -6,20 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PurchaseOrderDetailsModel extends Model {
-    protected $table = 'PurchaseOrderDetails';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = 'purchase_order_details';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'Product',
-        'PurchaseOrder',
-        'podPrice',
-        'podTax',
-        'podDiscountMethod',
-        'podDiscount',
-        'podQuantity',
-        'podTotal'
+        'product_id',
+        'purchase_order_id',
+        'price',
+        'quantity',
+        'total'
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 }
