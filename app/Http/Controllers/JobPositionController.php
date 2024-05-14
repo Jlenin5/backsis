@@ -6,9 +6,22 @@ use App\Models\JobPositionModel;
 use Illuminate\Http\Request;
 
 class JobPositionController extends Controller {
-    public function index() {
-        $jp = JobPositionModel::get();
-        return $jp;
+
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $jp = JobPositionModel::whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = JobPositionModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $jp,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
@@ -16,15 +29,14 @@ class JobPositionController extends Controller {
         if (!$jp) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
-        return [$jp];
+        return $jp;
     }
 
     public function store(Request $request) {
         $data = $request->json()->all();
         $jp = new JobPositionModel;
-        $jp->id = $data['id'];
-        $jp->jpName = $data['jpName'];
-        $jp->jpState = $data['jpState'];
+        $jp->name = $data['name'];
+        $jp->status = $data['status'];
         $jp->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -36,8 +48,8 @@ class JobPositionController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $jp = JobPositionModel::find($id);
-        $jp->jpName = $data['jpName'];
-        $jp->jpState = $data['jpState'];
+        $jp->name = $data['name'];
+        $jp->status = $data['status'];
         $jp->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
@@ -47,7 +59,8 @@ class JobPositionController extends Controller {
         if (!$jp) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $jp->delete();
+        $jp->deleted_at = now();
+        $jp->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -65,7 +78,11 @@ class JobPositionController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        JobPositionModel::whereIn('id', $ids)->delete();
+        foreach ($ids as $id) {
+            JobPositionModel::whereId($id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',

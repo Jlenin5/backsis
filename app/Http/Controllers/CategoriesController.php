@@ -22,9 +22,8 @@ class CategoriesController extends Controller {
     public function store(Request $request) {
         $data = $request->json()->all();
         $cate = new CategoriesModel;
-        $cate->id = $data['id'];
-        $cate->cateName = $data['cateName'];
-        $cate->cateState = $data['cateState'];
+        $cate->name = $data['name'];
+        $cate->status = $data['status'];
         $cate->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -36,8 +35,8 @@ class CategoriesController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $cate = CategoriesModel::find($id);
-        $cate->cateName = $data['cateName'];
-        $cate->cateState = $data['cateState'];
+        $cate->name = $data['name'];
+        $cate->status = $data['status'];
         $cate->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }

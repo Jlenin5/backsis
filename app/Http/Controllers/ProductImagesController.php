@@ -22,24 +22,24 @@ class ProductImagesController extends Controller {
     
         if (isset($request->product_images) && is_array($request->product_images)) {
             foreach ($request->product_images as $index => $imageData) {
-                if (isset($imageData['primPath'])) {
+                if (isset($imageData['path'])) {
                     // Verificar si ya existe una imagen con el mismo 'featured'
                     $existingImage = ProductImagesModel::where('featured', $imageData['featured'])->first();
     
                     if (!$existingImage) {
-                        $file = $imageData['primPath'];
+                        $file = $imageData['path'];
                         $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path("images/products/"), $fileName);
     
                         $productImage = new ProductImagesModel([
-                            'primPath' => $fileName,
-                            'Product' => $imageData['Product'],
+                            'path' => $fileName,
+                            'product_id' => $imageData['product_id'],
                             'featured' => $imageData['featured']
                         ]);
                         $productImage->save();
                     }
                 }
-                $existingImages = ProductImagesModel::where('Product', $imageData['Product'])->get()->pluck('featured')->toArray();
+                $existingImages = ProductImagesModel::where('product_id', $imageData['product_id'])->get()->pluck('featured')->toArray();
                 Log::info($existingImages);
                 // Eliminar imágenes existentes que no están presentes en las nuevas imágenes
                 $imagesToDelete = array_diff($existingImages, array_column($request->product_images, 'featured'));
@@ -55,14 +55,14 @@ class ProductImagesController extends Controller {
     public function update(Request $request) {
         if (isset($request->product_images) && is_array($request->product_images)) {
             foreach ($request->product_images as $index => $imageData) {
-                if (isset($imageData['primPath'])) {
-                    $file = $imageData['primPath'];
+                if (isset($imageData['path'])) {
+                    $file = $imageData['path'];
                     $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
                     $file->move(\public_path("images/products/"), $fileName);
 
                     $productImage = new ProductImagesModel([
-                        'primPath' => $fileName,
-                        'Product' => $imageData['Product'],
+                        'path' => $fileName,
+                        'product_id' => $imageData['product_id'],
                         'featured' => $imageData['featured']
                     ]);
                     $productImage->update();
@@ -80,7 +80,7 @@ class ProductImagesController extends Controller {
     public function destroyMultiple(Request $request) {
         $ids = $request->input('dataId', []);
         // Obtener las imágenes asociadas a los productos que se están eliminando
-        $imagesToDelete = ProductImagesModel::whereIn('id', $ids)->pluck('primPath');
+        $imagesToDelete = ProductImagesModel::whereIn('id', $ids)->pluck('path');
         // Eliminar las imágenes correspondientes
         foreach ($imagesToDelete as $image) {
             if (!empty($image)) {

@@ -6,13 +6,29 @@ use App\Models\BranchOfficesModel;
 use Illuminate\Http\Request;
 
 class BranchOfficesController extends Controller {
-    public function index() {
-        $bo = BranchOfficesModel::with('users','departments','provinces','districts')->where('deleted_at',null)->get();
-        return $bo;
+
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $bo = BranchOfficesModel::with(
+                'companies','employees','departments','provinces','districts'
+            )
+            ->where('deleted_at',null)
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = BranchOfficesModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $bo,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
-        $bo = BranchOfficesModel::with('users','departments','provinces','districts')->where('deleted_at',null)->find($id);
+        $bo = BranchOfficesModel::with('companies','employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
         if (!$bo) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -22,16 +38,16 @@ class BranchOfficesController extends Controller {
     public function store(Request $request) {
         $data = $request->json()->all();
         $bo = new BranchOfficesModel;
-        $bo->id = $data['id'];
-        $bo->boName = $data['boName'];
-        $bo->boPhone = $data['boPhone'];
-        $bo->boEmail = $data['boEmail'];
-        $bo->Department = $data['Department'];
-        $bo->Province = $data['Province'];
-        $bo->District = $data['District'];
-        $bo->boAddress = $data['boAddress'];
-        $bo->User = $data['User'];
-        $bo->boState = $data['boState'];
+        $bo->name = $data['name'];
+        $bo->phone = $data['phone'];
+        $bo->email = $data['email'];
+        $bo->company_id = $data['company_id'];
+        $bo->department_id = $data['department_id'];
+        $bo->province_id = $data['province_id'];
+        $bo->district_id = $data['district_id'];
+        $bo->address = $data['address'];
+        $bo->employee_id = $data['employee_id'];
+        $bo->status = $data['status'];
         $bo->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -43,15 +59,16 @@ class BranchOfficesController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $bo = BranchOfficesModel::find($id);
-        $bo->boName = $data['boName'];
-        $bo->boPhone = $data['boPhone'];
-        $bo->boEmail = $data['boEmail'];
-        $bo->Department = $data['Department'];
-        $bo->Province = $data['Province'];
-        $bo->District = $data['District'];
-        $bo->boAddress = $data['boAddress'];
-        $bo->User = $data['User'];
-        $bo->boState = $data['boState'];
+        $bo->name = $data['name'];
+        $bo->phone = $data['phone'];
+        $bo->email = $data['email'];
+        $bo->company_id = $data['company_id'];
+        $bo->department_id = $data['department_id'];
+        $bo->province_id = $data['province_id'];
+        $bo->district_id = $data['district_id'];
+        $bo->address = $data['address'];
+        $bo->employee_id = $data['employee_id'];
+        $bo->status = $data['status'];
         $bo->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }

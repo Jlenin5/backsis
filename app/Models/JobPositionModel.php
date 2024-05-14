@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JobPositionModel extends Model {
-    protected $table = 'JobPosition';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = 'job_positions';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'jpName',
-        'jpState',
+        'name',
+        'status',
     ];
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 }

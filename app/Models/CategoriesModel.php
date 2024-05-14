@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CategoriesModel extends Model {
-    protected $table = 'Categories';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = 'categories';
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'cateName',
-        'cateState',
+        'name',
+        'status',
     ];
+
+    protected $hidden = ['created_at','updated_at','deleted_at'];
 
     public function products() {
         return $this->belongsToMany(ProductsModel::class, 'ProductCategory', 'Category', 'Product')->withPivot('Product', 'Category');

@@ -6,9 +6,22 @@ use App\Models\WorkAreaModel;
 use Illuminate\Http\Request;
 
 class WorkAreaController extends Controller {
-    public function index() {
-        $wa = WorkAreaModel::get();
-        return $wa;
+
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $wa = WorkAreaModel::whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = WorkAreaModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $wa,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
@@ -22,9 +35,8 @@ class WorkAreaController extends Controller {
     public function store(Request $request) {
         $data = $request->json()->all();
         $wa = new WorkAreaModel;
-        $wa->id = $data['id'];
-        $wa->waName = $data['waName'];
-        $wa->waState = $data['waState'];
+        $wa->name = $data['name'];
+        $wa->status = $data['status'];
         $wa->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -36,8 +48,8 @@ class WorkAreaController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $wa = WorkAreaModel::find($id);
-        $wa->waName = $data['waName'];
-        $wa->waState = $data['waState'];
+        $wa->name = $data['name'];
+        $wa->status = $data['status'];
         $wa->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
@@ -47,7 +59,8 @@ class WorkAreaController extends Controller {
         if (!$wa) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $wa->delete();
+        $wa->deleted_at = now();
+        $wa->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -65,7 +78,11 @@ class WorkAreaController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        WorkAreaModel::whereIn('id', $ids)->delete();
+        foreach ($ids as $id) {
+            WorkAreaModel::whereId($id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',

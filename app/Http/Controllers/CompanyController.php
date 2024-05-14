@@ -23,24 +23,23 @@ class CompanyController extends Controller {
     public function store(Request $request) {
         $data = $request->json()->all();
         $com = new CompanyModel;
-        $com->id = $data['id'];
-        $com->comCode = $data['comCode'];
-        if ($request->hasFile('comImage')) {
+        $com->code = $data['code'];
+        if ($request->hasFile('image')) {
             // Genera un nombre de archivo único y guarda la imagen en la carpeta 'images/company'
             $currentDate = now()->format('Y-m-d');
-            $companyCode = $data['comCode'];
-            $uniqueFilename = md5($currentDate . $companyCode) . "." . $request->file('comImage')->getClientOriginalExtension();
-            $request->file('comImage')->move('images/company', $uniqueFilename);
-            $com->comImage = $uniqueFilename;
+            $companyCode = $data['code'];
+            $uniqueFilename = md5($currentDate . $companyCode) . "." . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move('images/company', $uniqueFilename);
+            $com->image = $uniqueFilename;
         } else {
-            $com->comImage = '';
+            $com->image = '';
         }
-        $com->comName = $data['comName'];
-        $com->comRUC = $data['comRUC'];
-        $com->comEmail = $data['comEmail'];
-        $com->comAddress = $data['comAddress'];
-        $com->comWebSite = $data['comWebSite'];
-        $com->comPhone = $data['comPhone'];
+        $com->name = $data['name'];
+        $com->document_number = $data['document_number'];
+        $com->email = $data['email'];
+        $com->address = $data['address'];
+        $com->web_site = $data['web_site'];
+        $com->phone = $data['phone'];
         $com->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -52,30 +51,30 @@ class CompanyController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->all();
         $com = CompanyModel::find($id);
-        $com->comCode = $data['comCode'];
-        if ($request->hasFile('comImage')) {
+        $com->code = $data['code'];
+        if ($request->hasFile('image')) {
             // Elimina la imagen anterior si existe
-            if (!empty($com->comImage)) {
-                $imagePath = public_path('images/company/' . $com->comImage);
+            if (!empty($com->image)) {
+                $imagePath = public_path('images/company/' . $com->image);
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
             }
             // Almacena la nueva imagen
             $currentDate = now()->format('Y-m-d');
-            $companyCode = $data['comCode'];
-            $uniqueFilename = md5($currentDate . $companyCode) . "." . $request->file('comImage')->getClientOriginalExtension();
-            $request->file('comImage')->move('images/company', $uniqueFilename);
-            $com->comImage = $uniqueFilename;
+            $companyCode = $data['code'];
+            $uniqueFilename = md5($currentDate . $companyCode) . "." . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move('images/company', $uniqueFilename);
+            $com->image = $uniqueFilename;
         } else {
-            $com->comImage = $request->comImage;
+            $com->image = $request->image;
         }
-        $com->comName = $data['comName'];
-        $com->comRUC = $data['comRUC'];
-        $com->comEmail = $data['comEmail'];
-        $com->comAddress = $data['comAddress'];
-        $com->comWebSite = $data['comWebSite'];
-        $com->comPhone = $data['comPhone'];
+        $com->name = $data['name'];
+        $com->document_number = $data['document_number'];
+        $com->email = $data['email'];
+        $com->address = $data['address'];
+        $com->web_site = $data['web_site'];
+        $com->phone = $data['phone'];
         $com->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
@@ -85,7 +84,8 @@ class CompanyController extends Controller {
         if (!$com) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $com->delete();
+        $com->deleted_at = now();
+        $com->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -103,7 +103,12 @@ class CompanyController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        CompanyModel::whereIn('id', $ids)->delete();
+
+        foreach ($ids as $id) {
+            CompanyModel::whereId($id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',

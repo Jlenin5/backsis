@@ -6,19 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductImagesModel extends Model {
-    protected $table = "ProductImages";
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+    
+    protected $table = "product_image";
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'primPath',
-        'Product',
+        'path',
+        'product_id',
         'featured'
     ];
 
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
     public function products() {
-        return $this->belongsTo(ProductsModel::class, 'Product', 'id');
+        return $this->belongsTo(ProductsModel::class, 'product_id', 'id');
     }
 }

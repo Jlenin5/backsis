@@ -7,13 +7,25 @@ use Illuminate\Http\Request;
 
 class EmployeeController extends Controller {
 
-    public function index() {
-        $emp = EmployeeModel::with('documentType','avatars','workAreas','jobPositions')->where('deleted_at',null)->get();
-        return $emp;
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $emp = EmployeeModel::with('avatars','workAreas','jobPositions')->where('deleted_at',null)
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = EmployeeModel::whereNull('deleted_at')->count();
+            
+        return response()->json([
+            'data' => $emp,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
-        $emp = EmployeeModel::with('documentType','avatars','workAreas','jobPositions')->where('deleted_at',null)->findOrFail($id);
+        $emp = EmployeeModel::with('avatars','workAreas','jobPositions')->where('deleted_at',null)->findOrFail($id);
         if (!$emp) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -23,21 +35,20 @@ class EmployeeController extends Controller {
     public function store(Request $request) {
         $data = $request->json()->all();
         $emp = new EmployeeModel;
-        $emp->id = $data['id'];
-        $emp->empImage = $data['empImage'];
-        $emp->empFirstName = $data['empFirstName'];
-        $emp->empSecondName = $data['empSecondName'];
-        $emp->empSurname = $data['empSurname'];
-        $emp->empSecondSurname = $data['empSecondSurname'];
-        $emp->DocumentType = $data['DocumentType'];
-        $emp->Atavar = $data['Atavar'];
-        $emp->WorkArea = $data['WorkArea'];
-        $emp->JobPosition = $data['JobPosition'];
-        $emp->empDocument = $data['empDocument'];
-        $emp->empEmail = $data['empEmail'];
-        $emp->empPhone = $data['empPhone'];
-        $emp->empGender = $data['empGender'];
-        $emp->empState = $data['empState'];
+        $emp->image = $data['image'];
+        $emp->first_name = $data['first_name'];
+        $emp->second_name = $data['second_name'];
+        $emp->surname = $data['surname'];
+        $emp->second_surname = $data['second_surname'];
+        $emp->avatar_id = $data['avatar_id'];
+        $emp->work_area_id = $data['work_area_id'];
+        $emp->job_position_id = $data['job_position_id'];
+        $emp->document_type = $data['document_type'];
+        $emp->document_number = $data['document_number'];
+        $emp->email = $data['email'];
+        $emp->phone = $data['phone'];
+        $emp->gender = $data['gender'];
+        $emp->status = $data['status'];
         $emp->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -49,20 +60,20 @@ class EmployeeController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $emp = EmployeeModel::find($id);
-        $emp->empImage = $data['empImage'];
-        $emp->empFirstName = $data['empFirstName'];
-        $emp->empSecondName = $data['empSecondName'];
-        $emp->empSurname = $data['empSurname'];
-        $emp->empSecondSurname = $data['empSecondSurname'];
-        $emp->DocumentType = $data['DocumentType'];
-        $emp->Atavar = $data['Atavar'];
-        $emp->WorkArea = $data['WorkArea'];
-        $emp->JobPosition = $data['JobPosition'];
-        $emp->empDocument = $data['empDocument'];
-        $emp->empEmail = $data['empEmail'];
-        $emp->empPhone = $data['empPhone'];
-        $emp->empGender = $data['empGender'];
-        $emp->empState = $data['empState'];
+        $emp->image = $data['image'];
+        $emp->first_name = $data['first_name'];
+        $emp->second_name = $data['second_name'];
+        $emp->surname = $data['surname'];
+        $emp->second_surname = $data['second_surname'];
+        $emp->avatar_id = $data['avatar_id'];
+        $emp->work_area_id = $data['work_area_id'];
+        $emp->job_position_id = $data['job_position_id'];
+        $emp->document_type = $data['document_type'];
+        $emp->document_number = $data['document_number'];
+        $emp->email = $data['email'];
+        $emp->phone = $data['phone'];
+        $emp->gender = $data['gender'];
+        $emp->status = $data['status'];
         $emp->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }

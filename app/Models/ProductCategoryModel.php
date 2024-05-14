@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductCategoryModel extends Model {
-    protected $table = "ProductCategory";
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = "product_category";
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'Product',
-        'Category',
+        'product_id',
+        'category_id',
     ];
+    
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     
 }

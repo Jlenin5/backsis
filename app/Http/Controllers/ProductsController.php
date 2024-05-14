@@ -7,6 +7,7 @@ use App\Models\ProductCategoryModel;
 use App\Models\ProductImagesModel;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ProductsModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -15,21 +16,48 @@ use GuzzleHttp\Client;
 
 class ProductsController extends Controller {
 
-    public function index() {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->get();
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        $prod = ProductsModel::with([
+                'categories' => function($query) {
+                    $query->whereNull('product_category.deleted_at');
+                },
+                'productImages', 'unit', 'warehouses'
+            ])
+            ->whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $prod->each(function ($product) {
-            $product->categories->each(function ($category) {
-                unset($category->pivot);
-            });
-            $product->warehouses->each(function ($branchOffice) {
-                unset($branchOffice->pivot);
-            });
+        $product->categories->each(function ($category) {
+            unset($category->pivot);
         });
-        return $prod;
+            // $product->warehouses->each(function ($branchOffice) {
+            //     unset($branchOffice->pivot);
+            // });
+        });
+
+        $totalRows = ProductsModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $prod,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->findOrFail($id);
+        $prod = ProductsModel::with([
+            'categories' => function($query) {
+                $query->whereNull('product_category.deleted_at');
+            },
+            'productImages', 'unit', 'warehouses'
+        ])->findOrFail($id);
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });
@@ -44,54 +72,48 @@ class ProductsController extends Controller {
 
     public function store(Request $request) {
         $data = $request->all();
-        $validator = Validator::make($data, [
-            'SerialNumber' => 'required',
-            'prodName' => 'required',
-            'prodStock' => 'required|numeric',
-            'prodPurchasePrice' => 'required|numeric',
-            'prodSalePrice' => 'required|numeric',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['code' => 400, 'status' => 'error', 'message' => 'Datos incompletos o no válidos', 'errors' => $validator->errors()]);
-        }
+        $product_data = json_decode($data['productData'], true);
         $prod = new ProductsModel;
-        $prod->id = (int)$data['id'];
-        $prod->SerialNumber = $data['SerialNumber'];
-        $prod->prodNumber = $data['prodNumber'];
-        $prod->featuredImageId = $data['featuredImageId'];
-        $prod->prodName = $data['prodName'];
-        $prod->prodDescription = $data['prodDescription'] === null ? '' : $data['prodDescription'];
-        $prod->Unit = $data['Unit'];
-        $prod->prodStock = $data['prodStock'];
-        $prod->prodPurchasePrice = $data['prodPurchasePrice'];
-        $prod->prodSalePrice = $data['prodSalePrice'];
-        $prod->prodWidth = $data['prodWidth'];
-        $prod->prodHeight = $data['prodHeight'];
-        $prod->prodDepth = $data['prodDepth'];
-        $prod->prodWeight = $data['prodWeight'];
-        $prod->prodState = (bool)$data['prodState'];
-        $prod->prodWebHome = (bool)$data['prodWebHome'];
-        $prod->prodCreatedAt = now();
-        $prod->prodUpdatedAt = now();
+        $prod->code = $product_data['code'];
+        $prod->featured = $product_data['featured'];
+        $prod->name = $product_data['name'];
+        $prod->description = $product_data['description'] ?? '';
+        $prod->unit_id = $product_data['unit_id'];
+        $prod->stock_alert = $product_data['stock_alert'];
+        $prod->purchase_price = $product_data['purchase_price'];
+        $prod->sale_price = $product_data['sale_price'];
+        $prod->width = $product_data['width'];
+        $prod->height = $product_data['height'];
+        $prod->depth = $product_data['depth'];
+        $prod->weight = $product_data['weight'];
+        $prod->web_site = (bool)$product_data['web_site'];
+        $prod->status = (bool)$product_data['status'];
         $prod->save();
 
-        if (isset($request->categories) && is_array($request->categories)) {
-            foreach ($data['categories'] as $categoryId) {
-                $prodCategory = new ProductCategoryModel([
-                    'Product' => $prod->id,
-                    'Category' => $categoryId['id'],
-                ]);
-                $prodCategory->save();
+        if (isset($request->product_images) && is_array($request->product_images)) {
+            foreach ($request->product_images as $index => $imageData) {
+                if (isset($imageData['path'])) {
+                    $file = $imageData['path'];
+                    $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path("images/products/"), $fileName);
+
+                    $productImage = new ProductImagesModel([
+                        'path' => $fileName,
+                        'product_id' => $prod->id,
+                        'featured' => $imageData['featured']
+                    ]);
+                    $productImage->save();
+                }
             }
         }
 
-        if (isset($request->branch_offices) && is_array($request->branch_offices)) {
-            foreach ($data['branch_offices'] as $branchOfficeId) {
-                $prodBranchOffice = new ProductWarehouseModel([
-                    'Product' => $prod->id,
-                    'BranchOffice' => $branchOfficeId['id'],
+        if (isset($product_data['categories']) && is_array($product_data['categories'])) {
+            foreach ($product_data['categories'] as $categoryId) {
+                $prodCategory = new ProductCategoryModel([
+                    'product_id' => $prod->id,
+                    'category_id' => $categoryId['id'],
                 ]);
-                $prodBranchOffice->save();
+                $prodCategory->save();
             }
         }
 
@@ -102,54 +124,82 @@ class ProductsController extends Controller {
         return $prod;
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request) {
         $data = $request->all();
-        $validator = Validator::make($data, [
-            'SerialNumber' => 'required',
-            'prodName' => 'required',
-            'prodStock' => 'required|numeric',
-            'prodPurchasePrice' => 'required|numeric',
-            'prodSalePrice' => 'required|numeric',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['code' => 400, 'status' => 'error', 'message' => 'Datos incompletos o no válidos', 'errors' => $validator->errors()]);
-        }
-        $prod = ProductsModel::find($id);
+        $product_data = json_decode($data['productData'], true);
+        $prod = ProductsModel::find($product_data['id']);
         if (!$prod) {
             return response()->json(['code' => 404, 'status' => 'error', 'message' => 'Producto no encontrado']);
         }
-        $prod->SerialNumber = $data['SerialNumber'];
-        $prod->prodNumber = $data['prodNumber'];
-        $prod->featuredImageId = $data['featuredImageId'];
-        $prod->prodName = $data['prodName'];
-        $prod->prodDescription = $data['prodDescription'] === null ? '' : $data['prodDescription'];
-        $prod->Unit = $data['Unit'];
-        $prod->prodStock = $data['prodStock'];
-        $prod->prodPurchasePrice = $data['prodPurchasePrice'];
-        $prod->prodSalePrice = $data['prodSalePrice'];
-        $prod->prodWidth = $data['prodWidth'];
-        $prod->prodHeight = $data['prodHeight'];
-        $prod->prodDepth = $data['prodDepth'];
-        $prod->prodWeight = $data['prodWeight'];
-        $prod->prodState = (bool)$data['prodState'];
-        $prod->prodWebHome = (bool)$data['prodWebHome'];
-        $prod->prodCreatedAt = now();
-        $prod->prodUpdatedAt = now();
+        $prod->code = $product_data['code'];
+        $prod->featured = $product_data['featured'];
+        $prod->name = $product_data['name'];
+        $prod->description = $product_data['description'] ?? '';
+        $prod->unit_id = $product_data['unit_id'];
+        $prod->stock_alert = $product_data['stock_alert'];
+        $prod->purchase_price = $product_data['purchase_price'];
+        $prod->sale_price = $product_data['sale_price'];
+        $prod->width = $product_data['width'];
+        $prod->height = $product_data['height'];
+        $prod->depth = $product_data['depth'];
+        $prod->weight = $product_data['weight'];
+        $prod->web_site = (bool)$product_data['web_site'];
+        $prod->status = (bool)$product_data['status'];
         $prod->update();
-        
-        $prod->categories()->detach();
-        if (isset($data['categories']) && is_array($data['categories'])) {
-            foreach ($data['categories'] as $categoryId) {
-                $prod->categories()->attach($categoryId['id']);
-            }
-        }
 
-        $prod->warehouses()->detach();
-        if (isset($data['branch_offices']) && is_array($data['branch_offices'])) {
-            foreach ($data['branch_offices'] as $branchOfficeId) {
-                $prod->warehouses()->attach($branchOfficeId['id']);
+        if (isset($request->product_images) && is_array($request->product_images)) {
+            foreach ($request->product_images as $index => $imageData) {
+                if (isset($imageData['path'])) {
+                    // Verificar si ya existe una imagen con el mismo 'featured'
+                    $existingImage = ProductImagesModel::where('featured', $imageData['featured'])->first();
+                    if (!$existingImage) {
+                        $file = $imageData['path'];
+                        $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path("images/products/"), $fileName);
+    
+                        $productImage = new ProductImagesModel([
+                            'path' => $fileName,
+                            'product_id' => $prod->id,
+                            'featured' => $imageData['featured']
+                        ]);
+                        $productImage->save();
+                    }
+                }
+                $existingImages = ProductImagesModel::where('product_id', $prod->id)->get()->pluck('featured')->toArray();
+                // Eliminar imágenes existentes que no están presentes en las nuevas imágenes
+                $imagesToDelete = array_diff($existingImages, array_column($request->product_images, 'featured'));
+                ProductImagesModel::whereIn('featured', $imagesToDelete)->update(['deleted_at' => now()]);
             }
         }
+        
+        // Obtener las categorías enviadas desde el front
+        $categories = $product_data['categories'] ?? [];
+        // Obtener las categorías existentes del producto
+        $existingCategories = $prod->categories->pluck('id')->toArray();
+        // Recorrer las categorías enviadas desde el front
+        foreach ($categories as $category) {
+            // Verificar si la categoría ya existe en el producto
+            if (!in_array($category['id'], $existingCategories)) {
+                // Si no existe, crear una nueva entrada en product_category
+                ProductCategoryModel::create([
+                    'product_id' => $prod->id,
+                    'category_id' => $category['id'],
+                ]);
+            } else {
+                // Si existe y está marcada como eliminada, actualizar deleted_at a null
+                $existingCategory = ProductCategoryModel::where('product_id', $prod->id)
+                    ->where('category_id', $category['id'])
+                    ->whereNotNull('deleted_at')
+                    ->first();
+                if ($existingCategory) {
+                    $existingCategory->deleted_at = null;
+                    $existingCategory->update();
+                }
+            }
+        }
+        // Marcar las categorías que no fueron enviadas desde el front como eliminadas
+        $deletedCategories = array_diff($existingCategories, array_column($categories, 'id'));
+        ProductCategoryModel::whereIn('category_id', $deletedCategories)->update(['deleted_at' => Carbon::now()]);
 
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado correctamente']);
     }
