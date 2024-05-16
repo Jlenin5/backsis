@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PurchaseOrderExcel;
+use App\Models\ProductWarehouseModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PurchaseOrdersController extends Controller {
@@ -79,14 +80,21 @@ class PurchaseOrdersController extends Controller {
         $puor->date_approved = $date_approved->format('Y-m-d');
         $puor->save();
         foreach($data['purchase_order_details'] as $detail) {
-            $puorDetail = new PurchaseOrderDetailsModel([
+            $purchase_order_detail = new PurchaseOrderDetailsModel([
                 'product_id' => $detail['product_id'],
                 'purchase_order_id' => $puor->id,
                 'price' => $detail['price'],
                 'quantity' => $detail['quantity'],
                 'total' => $detail['total']
             ]);
-            $puorDetail->save();
+            $purchase_order_detail->save();
+
+            $product_warehouse = new ProductWarehouseModel([
+                'product_id' => $detail['product_id'],
+                'warehouse_id' => $puor->warehouse_id,
+                'quantity' => $detail['quantity']
+            ]);
+            $product_warehouse->save();
         }
         return response()->json(['code'=>200,'status'=>'success','message'=>$puor]);
     }
