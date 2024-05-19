@@ -6,26 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ClientsModel extends Model {
-    protected $table = "Clients";
-    protected $primaryKey = 'id';
-    public $timestamps = false;
+
+    protected $table = "clients";
     use HasFactory;
 
     protected $fillable = [
         'id',
-        'cliFirstName',
-        'cliSecondName',
-        'DocumentType',
-        'cliDocument',
-        'cliEmail',
-        'cliPhone',
-        'cliGender',
-        'cliState',
-        'cliCreatedAt',
-        'cliUpdatedAt',
+        'name',
+        'document_type',
+        'document_number',
+        'email',
+        'phone',
+        'gender',
+        'status'
     ];
-    
-    public function documentType() {
-        return $this->belongsTo(DocumentTypesModel::class, 'DocumentType');
-    }
+
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
 }

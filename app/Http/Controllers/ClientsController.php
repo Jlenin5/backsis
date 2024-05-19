@@ -7,33 +7,41 @@ use Illuminate\Http\Request;
 
 class ClientsController extends Controller {
 
-    public function index() {
-        $cli = ClientsModel::get();
-        return $cli;
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+        $offset = ($page - 1) * $perPage;
+        $cli = ClientsModel::whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $totalRows = ClientsModel::whereNull('deleted_at')->count();
+
+        return response()->json([
+            'data' => $cli,
+            'totalRows' => $totalRows
+        ]);
     }
 
     public function getId($id) {
-        $cli = ClientsModel::find($id);
+        $cli = ClientsModel::whereNull('deleted_at')->find($id);
         if (!$cli) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
-        return [$cli];
+        return $cli;
     }
 
     public function store(Request $request) {
         $data = $request->json()->all();
         $cli = new ClientsModel;
-        $cli->id = $data['id'];
-        $cli->cliFirstName = $data['cliFirstName'];
-        $cli->cliSecondName = $data['cliSecondName'];
-        $cli->DocumentType = $data['DocumentType'];
-        $cli->cliDocument = $data['cliDocument'];
-        $cli->cliEmail = $data['cliEmail'];
-        $cli->cliPhone = $data['cliPhone'];
-        $cli->cliGender = $data['cliGender'];
-        $cli->cliState = $data['cliState'];
-        $cli->cliCreatedAt = now();
-        $cli->cliUpdatedAt = now();
+        $cli->name = $data['name'];
+        $cli->document_type = $data['document_type'];
+        $cli->document_number = $data['document_number'];
+        $cli->email = $data['email'];
+        $cli->phone = $data['phone'];
+        $cli->gender = $data['gender'];
+        $cli->status = $data['status'];
         $cli->save();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
@@ -45,16 +53,13 @@ class ClientsController extends Controller {
     public function update(Request $request, $id) {
         $data = $request->json()->all();
         $cli = ClientsModel::find($id);
-        $cli->cliFirstName = $data['cliFirstName'];
-        $cli->cliSecondName = $data['cliSecondName'];
-        $cli->DocumentType = $data['DocumentType'];
-        $cli->cliDocument = $data['cliDocument'];
-        $cli->cliEmail = $data['cliEmail'];
-        $cli->cliPhone = $data['cliPhone'];
-        $cli->cliGender = $data['cliGender'];
-        $cli->cliState = $data['cliState'];
-        $cli->cliCreatedAt = now();
-        $cli->cliUpdatedAt = now();
+        $cli->name = $data['name'];
+        $cli->document_type = $data['document_type'];
+        $cli->document_number = $data['document_number'];
+        $cli->email = $data['email'];
+        $cli->phone = $data['phone'];
+        $cli->gender = $data['gender'];
+        $cli->status = $data['status'];
         $cli->update();
         return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
     }
@@ -64,7 +69,8 @@ class ClientsController extends Controller {
         if (!$cli) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $cli->delete();
+        $cli->deleted_at = now();
+        $cli->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -82,7 +88,11 @@ class ClientsController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        ClientsModel::whereIn('id', $ids)->delete();
+        foreach ($ids as $id) {
+            ClientsModel::whereId($id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',
