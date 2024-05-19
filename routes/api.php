@@ -35,6 +35,7 @@ use App\Http\Controllers\JobPositionController;
 use App\Http\Controllers\MobilitiesController;
 use App\Http\Controllers\PurchaseOrdersController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\SaleOrdersController;
 use App\Http\Controllers\TaxesController;
 use App\Http\Controllers\WarehousesController;
 use App\Http\Controllers\UbigeoController;
@@ -317,6 +318,18 @@ Route::controller(RolesController::class)->group(function() {
     Route::delete('/deleterol/{id}', 'destroy');
     Route::get('/rolmax', 'getMaxId');
     Route::delete('/delrolmulti', 'destroyMultiple');
+});
+Route::controller(SaleOrdersController::class)->group(function() {
+    Route::get('/saor', 'index');
+    Route::get('/saor/{id}', 'getId');
+    Route::post('/postsaor', 'store');
+    Route::put('/updatesaor/{id}', 'update');
+    Route::delete('/deletesaor/{id}', 'destroy');
+    Route::get('/saormax', 'getMaxId');
+    Route::delete('/delsaormulti', 'destroyMultiple');
+    Route::get('/excelsaor', 'exportExcel');
+    Route::get('/pdfsaor', 'exportPDF');
+    Route::get('/pdfsaorid/{id}', 'exportPDFId');
 });
 Route::controller(SerialNumberController::class)->group(function() {
     Route::get('/sn', 'index');
