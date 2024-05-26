@@ -7,6 +7,7 @@ use App\Models\ProductCategoryModel;
 use App\Models\ProductImagesModel;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ProductsModel;
+use App\Models\ProductTaxesModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -26,7 +27,7 @@ class ProductsController extends Controller {
                 'categories' => function($query) {
                     $query->whereNull('product_category.deleted_at');
                 },
-                'productImages', 'unit', 'warehouses'
+                'productImages', 'product_taxes', 'unit', 'warehouses'
             ])
             ->whereNull('deleted_at')
             ->offset($offset)
@@ -56,7 +57,7 @@ class ProductsController extends Controller {
             'categories' => function($query) {
                 $query->whereNull('product_category.deleted_at');
             },
-            'productImages', 'unit', 'warehouses'
+            'productImages', 'product_taxes', 'unit', 'warehouses'
         ])->findOrFail($id);
         $prod->categories->each(function ($category) {
             unset($category->pivot);
@@ -107,6 +108,16 @@ class ProductsController extends Controller {
             }
         }
 
+        $tax = $request->product_taxes;
+        $productTax = new ProductTaxesModel([
+            'product_id' => $prod->id,
+            'igv' => (bool)$tax['igv'],
+            'isc' => (bool)$tax['isc'],
+            'igv_value' => $tax['igv_value'],
+            'isc_value' => $tax['isc_value'],
+        ]);
+        $productTax->save();
+
         if (isset($product_data['categories']) && is_array($product_data['categories'])) {
             foreach ($product_data['categories'] as $categoryId) {
                 $prodCategory = new ProductCategoryModel([
@@ -150,7 +161,6 @@ class ProductsController extends Controller {
         if (isset($request->product_images) && is_array($request->product_images)) {
             foreach ($request->product_images as $index => $imageData) {
                 if (isset($imageData['path'])) {
-                    // Verificar si ya existe una imagen con el mismo 'featured'
                     $existingImage = ProductImagesModel::where('featured', $imageData['featured'])->first();
                     if (!$existingImage) {
                         $file = $imageData['path'];
@@ -171,16 +181,20 @@ class ProductsController extends Controller {
                 ProductImagesModel::whereIn('featured', $imagesToDelete)->update(['deleted_at' => now()]);
             }
         }
+
+        $tax_edit = $product_data['product_taxes'];
+        $tax = ProductTaxesModel::find($tax_edit['id']);
+        $tax->product_id = $prod->id;
+        $tax->igv = (bool)$tax_edit['igv'];
+        $tax->isc = (bool)$tax_edit['isc'];
+        $tax->igv_value = $tax_edit['igv_value'];
+        $tax->isc_value = $tax_edit['isc_value'];
+        $tax->update();
         
-        // Obtener las categorías enviadas desde el front
         $categories = $product_data['categories'] ?? [];
-        // Obtener las categorías existentes del producto
         $existingCategories = $prod->categories->pluck('id')->toArray();
-        // Recorrer las categorías enviadas desde el front
         foreach ($categories as $category) {
-            // Verificar si la categoría ya existe en el producto
             if (!in_array($category['id'], $existingCategories)) {
-                // Si no existe, crear una nueva entrada en product_category
                 ProductCategoryModel::create([
                     'product_id' => $prod->id,
                     'category_id' => $category['id'],
@@ -211,7 +225,8 @@ class ProductsController extends Controller {
         if (!$prod) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
-        $prod->delete();
+        $prod->deleted_at = now();
+        $prod->update();
         return response()->json(['message' => 'Eliminado correctamente']);
     }
 
@@ -238,10 +253,18 @@ class ProductsController extends Controller {
                     $product->warehouses()->detach();
                 }
             }
-            ProductsModel::whereIn('id', $ids)->delete();
+            foreach ($ids as $id) {
+                ProductsModel::whereId($id)->update([
+                    'deleted_at' => now(),
+                ]);
+            }
         });
 
-        ProductsModel::whereIn('id', $ids)->delete();
+        foreach ($ids as $id) {
+            ProductsModel::whereId($id)->update([
+                'deleted_at' => now(),
+            ]);
+        }
         return response()->json([
             'code' => 200,
             'status' => 'success',
@@ -249,9 +272,8 @@ class ProductsController extends Controller {
         ]);
     }
 
-
     public function featuredId($featured) {
-        $prod = ProductsModel::with('categories', 'productImages', 'serialNumber', 'unit', 'warehouses')->where('prodNumber',$featured)->first();
+        $prod = ProductsModel::with('categories', 'productImages', 'unit', 'warehouses')->where('code',$featured)->first();
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });

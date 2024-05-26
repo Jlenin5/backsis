@@ -38,6 +38,10 @@ class ProductsModel extends Model {
         return $this->hasMany(ProductImagesModel::class, 'product_id');
     }
 
+    public function product_taxes() {
+        return $this->hasOne(ProductTaxesModel::class, 'product_id');
+    }
+
     public function unit() {
         return $this->belongsTo(UnitModel::class, 'unit_id', 'id');
     }
