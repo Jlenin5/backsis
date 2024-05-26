@@ -8,6 +8,7 @@ use App\Models\ProductImagesModel;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ProductsModel;
 use App\Models\ProductTaxesModel;
+use App\Models\WarehousesModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -27,6 +28,9 @@ class ProductsController extends Controller {
                 'categories' => function($query) {
                     $query->whereNull('product_category.deleted_at');
                 },
+                'warehouses' => function($query) {
+                    $query->whereNull('product_warehouse.deleted_at');
+                },
                 'productImages', 'product_taxes', 'unit', 'warehouses'
             ])
             ->whereNull('deleted_at')
@@ -36,12 +40,12 @@ class ProductsController extends Controller {
             ->get();
 
         $prod->each(function ($product) {
-        $product->categories->each(function ($category) {
-            unset($category->pivot);
-        });
-            // $product->warehouses->each(function ($branchOffice) {
-            //     unset($branchOffice->pivot);
-            // });
+            $product->categories->each(function ($category) {
+                unset($category->pivot);
+            });
+            $product->warehouses->each(function ($warehouse) {
+                unset($warehouse->pivot);
+            });
         });
 
         $totalRows = ProductsModel::whereNull('deleted_at')->count();
@@ -108,7 +112,7 @@ class ProductsController extends Controller {
             }
         }
 
-        $tax = $request->product_taxes;
+        $tax = $product_data['product_taxes'];
         $productTax = new ProductTaxesModel([
             'product_id' => $prod->id,
             'igv' => (bool)$tax['igv'],
@@ -126,6 +130,20 @@ class ProductsController extends Controller {
                 ]);
                 $prodCategory->save();
             }
+        }
+
+        $warehouses = WarehousesModel::whereNull('deleted_at')->pluck('id')->toArray();
+        if ($warehouses) {
+            foreach ($warehouses as $warehouse) {
+                $product_warehouse[] = [
+                    'product_id'   => $prod->id,
+                    'warehouse_id' => $warehouse,
+                    'quantity' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+            ProductWarehouseModel::insert($product_warehouse);
         }
 
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
