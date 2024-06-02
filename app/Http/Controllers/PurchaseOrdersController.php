@@ -65,8 +65,12 @@ class PurchaseOrdersController extends Controller {
         $data = $request->json()->all();
         $date = Carbon::parse($data['date']);
         $date_approved = Carbon::parse($data['date_approved']);
+
+        $lastCode = PurchaseOrdersModel::orderBy('id', 'desc')->first()->code ?? '00000000';
+        $newCode = str_pad((int)$lastCode + 1, 8, '0', STR_PAD_LEFT);
+
         $puor = new PurchaseOrdersModel;
-        $puor->code = $data['code'];
+        $puor->code = $newCode;
         $puor->warehouse_id = $data['warehouse_id'];
         $puor->supplier_id = $data['supplier_id'];
         $puor->employee_id = $data['employee_id'];
@@ -79,24 +83,38 @@ class PurchaseOrdersController extends Controller {
         $puor->is_approved = $data['is_approved'];
         $puor->date_approved = $date_approved->format('Y-m-d');
         $puor->save();
+        
         foreach($data['purchase_order_details'] as $detail) {
             $purchase_order_detail = new PurchaseOrderDetailsModel([
                 'product_id' => $detail['product_id'],
                 'purchase_order_id' => $puor->id,
-                'price' => $detail['price'],
+                'price' => $detail['sale_price'],
                 'quantity' => $detail['quantity'],
+                'tax_method' => (bool)$detail['tax_method'],
+                'tax_net' => $detail['tax_net'],
+                'discount_method' => (bool)$detail['discount_method'],
+                'discount' => $detail['discount'],
                 'total' => $detail['total']
             ]);
             $purchase_order_detail->save();
 
-            $product_warehouse = new ProductWarehouseModel([
-                'product_id' => $detail['product_id'],
-                'warehouse_id' => $puor->warehouse_id,
-                'quantity' => $detail['quantity']
-            ]);
-            $product_warehouse->save();
+            $product_warehouse = ProductWarehouseModel::whereNull('deleted_at')
+                                                        ->where('product_id',$detail['product_id'])
+                                                        ->where('warehouse_id',$data['warehouse_id'])
+                                                        ->first();
+            if ($product_warehouse) {
+                $product_warehouse->quantity = $product_warehouse->quantity + $detail['quantity'];
+                $product_warehouse->update();
+            } else {
+                $product_warehouse = new ProductWarehouseModel([
+                    'product_id' => $detail['product_id'],
+                    'warehouse_id' => $puor->warehouse_id,
+                    'quantity' => $detail['quantity']
+                ]);
+                $product_warehouse->save();
+            }
         }
-        return response()->json(['code'=>200,'status'=>'success','message'=>$puor]);
+        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
 
     public function show(PurchaseOrdersModel $puor) {
@@ -108,7 +126,6 @@ class PurchaseOrdersController extends Controller {
         $date = Carbon::parse($data['date']);
         $date_approved = Carbon::parse($data['date_approved']);
         $puor = PurchaseOrdersModel::find($id);
-        $puor->code = $data['code'];
         $puor->warehouse_id = $data['warehouse_id'];
         $puor->supplier_id = $data['supplier_id'];
         $puor->employee_id = $data['employee_id'];

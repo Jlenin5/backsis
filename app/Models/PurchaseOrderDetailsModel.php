@@ -16,6 +16,10 @@ class PurchaseOrderDetailsModel extends Model {
         'purchase_order_id',
         'price',
         'quantity',
+        'tax_method',
+        'tax_net',
+        'discount_method',
+        'discount',
         'total'
     ];
 
