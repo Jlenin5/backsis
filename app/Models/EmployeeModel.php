@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class EmployeeModel extends Model {
     
     protected $table = 'employees';
-    protected $primaryKey = 'id';
     use HasFactory;
 
     protected $fillable = [
@@ -31,15 +30,15 @@ class EmployeeModel extends Model {
 
     protected $hidden = ['created_at','updated_at','deleted_at'];
 
-    public function avatars() {
-        return $this->belongsTo(AvatarsModel::class, 'avatar_id', 'id');
+    public function avatar() {
+        return $this->belongsTo(AvatarsModel::class);
     }
 
-    public function workAreas() {
-        return $this->belongsTo(WorkAreaModel::class, 'work_area_id', 'id');
+    public function work_area() {
+        return $this->belongsTo(WorkAreaModel::class);
     }
     
-    public function jobPositions() {
-        return $this->belongsTo(JobPositionModel::class, 'job_position_id', 'id');
+    public function job_position() {
+        return $this->belongsTo(JobPositionModel::class);
     }
 }

@@ -11,7 +11,7 @@ class EmployeeController extends Controller {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
         $offset = ($page - 1) * $perPage;
-        $emp = EmployeeModel::with('avatars','workAreas','jobPositions')->where('deleted_at',null)
+        $emp = EmployeeModel::with('avatar','work_area','job_position')->where('deleted_at',null)
             ->offset($offset)
             ->limit($perPage)
             ->orderBy('created_at', 'desc')
@@ -25,7 +25,7 @@ class EmployeeController extends Controller {
     }
 
     public function getId($id) {
-        $emp = EmployeeModel::with('avatars','workAreas','jobPositions')->where('deleted_at',null)->findOrFail($id);
+        $emp = EmployeeModel::with('avatar','work_area','job_position')->where('deleted_at',null)->findOrFail($id);
         if (!$emp) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
