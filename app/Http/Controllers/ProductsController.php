@@ -8,7 +8,6 @@ use App\Models\ProductImagesModel;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ProductsModel;
 use App\Models\ProductTaxesModel;
-use App\Models\WarehousesModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -78,8 +77,14 @@ class ProductsController extends Controller {
     public function store(Request $request) {
         $data = $request->all();
         $product_data = json_decode($data['productData'], true);
+
+        $lastCode = ProductsModel::orderBy('id', 'desc')->first()->code ?? 'PRD-0000';
+        $lastNumber = (int)substr($lastCode, 4);
+        $newNumber = $lastNumber + 1;
+        $newCode = 'PRD-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+
         $prod = new ProductsModel;
-        $prod->code = $product_data['code'];
+        $prod->code = $newCode;
         $prod->featured = $product_data['featured'];
         $prod->name = $product_data['name'];
         $prod->description = $product_data['description'] ?? '';
@@ -96,7 +101,7 @@ class ProductsController extends Controller {
         $prod->save();
 
         if (isset($request->product_images) && is_array($request->product_images)) {
-            foreach ($request->product_images as $index => $imageData) {
+            foreach ($request->product_images as $imageData) {
                 if (isset($imageData['path'])) {
                     $file = $imageData['path'];
                     $fileName = uniqid($imageData['featured']) . '.' . $file->getClientOriginalExtension();
@@ -130,20 +135,6 @@ class ProductsController extends Controller {
                 ]);
                 $prodCategory->save();
             }
-        }
-
-        $warehouses = WarehousesModel::whereNull('deleted_at')->pluck('id')->toArray();
-        if ($warehouses) {
-            foreach ($warehouses as $warehouse) {
-                $product_warehouse[] = [
-                    'product_id'   => $prod->id,
-                    'warehouse_id' => $warehouse,
-                    'quantity' => 0,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ];
-            }
-            ProductWarehouseModel::insert($product_warehouse);
         }
 
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
