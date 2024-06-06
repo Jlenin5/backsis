@@ -151,7 +151,6 @@ class ProductsController extends Controller {
         if (!$prod) {
             return response()->json(['code' => 404, 'status' => 'error', 'message' => 'Producto no encontrado']);
         }
-        $prod->code = $product_data['code'];
         $prod->featured = $product_data['featured'];
         $prod->name = $product_data['name'];
         $prod->description = $product_data['description'] ?? '';
