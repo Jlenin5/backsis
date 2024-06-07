@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BranchOfficesModel;
 use App\Models\ProductsModel;
 use App\Models\ProductWarehouseModel;
 use App\Models\WarehousesModel;
@@ -19,12 +20,9 @@ class ReportsController extends Controller {
         $warehouses = WarehousesModel::whereNull('deleted_at')->get(['id', 'name']);
         $warehouses_id = WarehousesModel::whereNull('deleted_at')->pluck('id')->toArray();
 
-        $branch_offices = WarehousesModel::where('deleted_at', '=', null)->get(['id', 'name']);
+        $branch_offices = BranchOfficesModel::whereNull('deleted_at')->get(['id', 'name']);
 
-        $products_data = ProductsModel::with([
-                'categories', 'productImages', 'unit', 'warehouses'
-            ])
-            ->whereNull('deleted_at');
+        $products_data = ProductsModel::where('status',1)->whereNull('deleted_at');
 
         $totalRows = $products_data->count();
         $products = $products_data->offset($offset)
@@ -36,54 +34,31 @@ class ReportsController extends Controller {
             $item['id'] = $product->id;
             $item['code'] = $product->code;
             $item['name'] = $product->name;
+            $item['purchase_price'] = $product->purchase_price;
+            $item['sale_price'] = $product->sale_price;
             
-            $current_stock = ProductWarehouseModel::where('product_id', $product->id)
+            $reserve_stock = ProductWarehouseModel::where('product_id', $product->id)
                 ->whereNull('deleted_at')
                 ->whereIn('warehouse_id', $warehouses_id)
-                ->when($request->filled('warehouse_id'), function ($query) use ($request)  {
-                    $query->where('warehouse_id', $request->warehouse_id);
-                   })
-                   ->when($request->filled('branch_office_id'), function ($query) use ($request){
-                    $query->whereHas('warehouse', function ($query) use ($request){
+                ->when($request->filled('warehouse_id'), function ($query) use ($request) {
+                        $query->where('warehouse_id', $request->warehouse_id);
+                    })
+                    ->when($request->filled('branch_office_id'), function ($query) use ($request) {
+                        $query->whereHas('warehouse', function ($query) use ($request){
                             $query->where('branch_office_id',  $request->branch_office_id);
-                         });
+                        });
                     })
                 ->sum('quantity');
             
-            $item['reserve'] = $product->reserveStock();
-            $reserveStock = $product->reserveStock();
+            $item['reserve_stock'] = $reserve_stock;
 
-            if (count($reserveStock) > 0) {
-                $totalreserve=0;
-                foreach ($reserveStock as $reserve) {
-                    if ($request['branch_office_id']) {
-                        if ($request['warehouse_id']) {
-                            if ($reserve->warehouse_id == $request['warehouse_id']) {
-                                $totalreserve = $reserve->total;
-                            }
-                        } else if ($reserve->branch_office_id == $request['branch_office_id']) {
-                            $totalreserve += $reserve->total;
-                        }
-                    } else if ($request['warehouse_id']) {
-                        if ($reserve->warehouse_id == $request['warehouse_id']) {
-                            $totalreserve = $reserve->total;
-                        }
-                    } else {
-                        $totalreserve += $reserve->total;
-                    }
-                }
-                $item['reserve_stock'] =  $totalreserve. ' ' . $product['unit']->short_name;
-            } else {
-                $item['reserve_stock'] = "";
-            }
-
-            $item['quantity'] = $current_stock .' '.$product['unit']->short_name;
+            $item['unit'] = $product['unit']->name;
 
             $data[] = $item;
         }
         
         return response()->json([
-            'report' => $data,
+            'data' => $data,
             'totalRows' => $totalRows,
             'warehouses' => $warehouses,
             'branch_offices'=> $branch_offices
