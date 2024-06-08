@@ -30,23 +30,23 @@ class WarehousesModel extends Model {
         return $this->belongsToMany(ProductsModel::class, 'ProductWarehouse', 'Warehouse', 'Product')->withPivot('Product', 'BranchOffice');
     }
 
-    public function branch_offices() {
+    public function branch_office() {
         return $this->belongsTo(BranchOfficesModel::class, 'branch_office_id', 'id');
     }
 
-    public function employees() {
+    public function employee() {
         return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id');
     }
 
-    public function departments() {
+    public function department() {
         return $this->belongsTo(DepartmentsModel::class, 'department_id', 'id');
     }
 
-    public function provinces() {
+    public function province() {
         return $this->belongsTo(ProvincesModel::class, 'province_id', 'id');
     }
 
-    public function districts() {
+    public function district() {
         return $this->belongsTo(DistrictsModel::class, 'district_id', 'id');
     }
 

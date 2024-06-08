@@ -19,17 +19,17 @@ class SaleOrdersController extends Controller {
             $searchText = $request->query('search_text');
             $offset = ($page - 1) * $perPage;
             $query = SaleOrdersModel::with(
-                    'sale_order_details','warehouses','clients','employees'
+                    'sale_order_details','warehouse','client','employee'
                 )
                 ->whereNull('deleted_at');
 
             if ($searchText) {
                 $query->where(function ($query) use ($searchText) {
                     $query->where('code', 'LIKE', "%{$searchText}%")
-                            ->orWhereHas('clients', function ($query) use ($searchText) {
+                            ->orWhereHas('client', function ($query) use ($searchText) {
                                 $query->where('name', 'LIKE', "%{$searchText}%");
                             })
-                            ->orWhereHas('employees', function ($query) use ($searchText) {
+                            ->orWhereHas('employee', function ($query) use ($searchText) {
                                 $query->where('first_name', 'LIKE', "%{$searchText}%")
                                     ->orWhere('second_name', 'LIKE', "%{$searchText}%")
                                     ->orWhere('surname', 'LIKE', "%{$searchText}%")

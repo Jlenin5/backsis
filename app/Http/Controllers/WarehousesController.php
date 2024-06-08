@@ -12,7 +12,7 @@ class WarehousesController extends Controller {
         $perPage = $request->query('per_page', 10);
         $offset = ($page - 1) * $perPage;
         $wh = WarehousesModel::with(
-                'branch_offices','employees','departments','provinces','districts'
+                'branch_office','employee','department','province','district'
             )
             ->where('deleted_at',null)
             ->offset($offset)
@@ -28,7 +28,7 @@ class WarehousesController extends Controller {
     }
 
     public function getId($id) {
-        $wh = WarehousesModel::with('branch_offices','employees','departments','provinces','districts')->where('deleted_at',null)->find($id);
+        $wh = WarehousesModel::with('branch_office','employee','department','province','district')->where('deleted_at',null)->find($id);
         if (!$wh) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }

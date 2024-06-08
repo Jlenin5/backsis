@@ -30,7 +30,7 @@ class BranchOfficesModel extends Model {
         return $this->belongsToMany(ProductsModel::class, 'ProductBranchOffice', 'BranchOffice', 'Product')->withPivot('Product', 'BranchOffice');
     }
 
-    public function companies() {
+    public function company() {
         return $this->belongsTo(CompanyModel::class, 'company_id', 'id');
     }
 

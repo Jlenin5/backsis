@@ -309,6 +309,7 @@ Route::controller(QuoteDetailsController::class)->group(function() {
 });
 Route::controller(ReportsController::class)->group(function() {
     Route::get('/stock_report', 'stock_report');
+    Route::get('/stock_report/{id}', 'stock_report_id');
 });
 Route::controller(RolesController::class)->group(function() {
     Route::get('/rol', 'index');

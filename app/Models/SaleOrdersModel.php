@@ -35,15 +35,15 @@ class SaleOrdersModel extends Model {
         return $this->hasMany(SaleOrderDetailsModel::class, 'sale_order_id');
     }
 
-    public function warehouses() {
-        return $this->belongsTo(WarehousesModel::class, 'warehouse_id', 'id');
+    public function warehouse() {
+        return $this->belongsTo(WarehousesModel::class);
     }
 
-    public function clients() {
-        return $this->belongsTo(ClientsModel::class, 'client_id', 'id');
+    public function client() {
+        return $this->belongsTo(ClientsModel::class);
     }
 
-    public function employees() {
-        return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id');
+    public function employee() {
+        return $this->belongsTo(EmployeeModel::class);
     }
 }
