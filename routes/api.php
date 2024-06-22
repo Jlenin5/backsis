@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AvatarsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ClientsController;
@@ -47,6 +48,9 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+Route::controller(AnalyticsController::class)->group(function() {
+    Route::get('/audience', 'audience');
+});
 Route::controller(AvatarsController::class)->group(function() {
     Route::get('/ava', 'index');
     Route::get('/ava/{id}', 'getId');
