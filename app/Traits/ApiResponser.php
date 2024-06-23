@@ -5,11 +5,11 @@ namespace App\Traits;
 trait ApiResponser {
 
   static function stored($data = [], $message = "Datos registrados correctamente") {
-    return response()->json(['message' => $message, 'content' => $data], 201);
+    return response()->json(['message' => $message, 'data' => $data], 201);
   }
 
   static function get($data = []) {
-    return response()->json(['content' => $data]);
+    return response()->json(['data' => $data]);
   }
 
   static function error($errors) {
@@ -17,11 +17,11 @@ trait ApiResponser {
   }
 
   static function updated($data = [], $message = 'Datos actualizados correctamente') {
-    return response()->json(['message' => $message, 'content' => $data]);
+    return response()->json(['message' => $message, 'data' => $data]);
   }
 
   static function updatedFail($data = [], $message = 'not valid') {
-    return response()->json(['message' => $message, 'content' => $data], 400);
+    return response()->json(['message' => $message, 'data' => $data], 400);
   }
 
   static function deleted($remove, $message = 'Datos eliminados correctamente') {
@@ -29,22 +29,22 @@ trait ApiResponser {
   }
 
   static function showOne($data = []) {
-    return response()->json(['content' => $data]);
+    return response()->json(['data' => $data]);
   }
 
-  static function success($data = [], $message = " success ") {
-    return response()->json(['message' => $message, 'content' => $data]);
+  static function success($data = [], $message = "success") {
+    return response()->json(['message' => $message, 'data' => $data]);
   }
 
   static function getAll($data, $message = "success") {
     if (request()->paginate) {
       return response()->json($data, 200);
     }
-    return response()->json(['message' => $message, 'content' => $data], 200);
+    return response()->json(['message' => $message, 'data' => $data], 200);
   }
 
   static function unauthorized($message = 'No estas autorizado', $data = []) {
-    return response()->json(['message' => $message, 'content' => $data], 403);
+    return response()->json(['message' => $message, 'data' => $data], 403);
   }
 
   static function notFount($message = '"Not Found!"') {

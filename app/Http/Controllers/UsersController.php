@@ -5,12 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\UsersModel;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
+use App\Traits\ApiResponser;
 
 class UsersController extends Controller {
+
+    use ApiResponser;
     
-    public function index() {
-        $user = UsersModel::with('employee','rol')->where('deleted_at',null)->get();
-        return $user;
+    public function index(Request $request) {
+
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        return $this->getAll(
+            UsersModel::with('employee','rol')
+                ->where('deleted_at',null)
+                ->whereNull('deleted_at')
+                ->offset($offset)
+                ->limit($perPage)
+                ->orderBy('created_at', 'desc')
+                ->get()
+        );
     }
 
     public function getId($id) {
