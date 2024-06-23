@@ -30,7 +30,7 @@ class ProductsController extends Controller {
                 'warehouses' => function($query) {
                     $query->whereNull('product_warehouse.deleted_at');
                 },
-                'productImages', 'product_taxes', 'unit', 'warehouses'
+                'product_images', 'product_taxes', 'unit', 'warehouses'
             ])
             ->whereNull('deleted_at')
             ->offset($offset)
@@ -60,7 +60,7 @@ class ProductsController extends Controller {
             'categories' => function($query) {
                 $query->whereNull('product_category.deleted_at');
             },
-            'productImages', 'product_taxes', 'unit', 'warehouses'
+            'product_images', 'product_taxes', 'unit', 'warehouses'
         ])->findOrFail($id);
         $prod->categories->each(function ($category) {
             unset($category->pivot);
@@ -281,7 +281,7 @@ class ProductsController extends Controller {
     }
 
     public function featuredId($featured) {
-        $prod = ProductsModel::with('categories', 'productImages', 'unit', 'warehouses')->where('code',$featured)->first();
+        $prod = ProductsModel::with('categories', 'product_images', 'unit', 'warehouses')->where('code',$featured)->first();
         $prod->categories->each(function ($category) {
             unset($category->pivot);
         });

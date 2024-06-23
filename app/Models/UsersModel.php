@@ -2,31 +2,55 @@
 
 namespace App\Models;
 
+use App\Traits\BaseModelFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
 
-class UsersModel extends Model {
+class UsersModel extends Authenticatable {
+
+    use Notifiable, HasFactory,  SoftDeletes, HasRoles, BaseModelFilter;
     
     protected $table = 'users';
-    use HasFactory;
 
     protected $fillable = [
-        'id',
         'employee_id',
         'display_name',
         'display_email',
         'password',
         'rol_id',
         'uuid',
+        'status',
+        'user_create_id',
+        'user_update_id'
     ];
 
-    protected $hidden = ['created_at','updated_at','deleted_at'];
+    protected $hidden = ['created_at','updated_at','deleted_at','password', 'remember_token'];
 
-    public function employees() {
-        return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id')->with('avatars');
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    protected $appends = ['license'];
+
+    public function getJWTCustomClaims() {
+        return [];
     }
 
-    public function roles() {
-        return $this->belongsTo(RolesModel::class, 'rol_id', 'id');
+    public function employee() {
+        return $this->belongsTo(EmployeeModel::class)->with('avatar');
+    }
+
+    public function rol() {
+        return $this->belongsTo(RolesModel::class);
+    }
+    
+    public function getLicenseAttribute() {
+        return SettingsModel::where('key', 'license')->first()->value ?? 'INTEGRAL';
     }
 }

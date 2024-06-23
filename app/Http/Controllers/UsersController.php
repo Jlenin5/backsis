@@ -9,12 +9,12 @@ use Ramsey\Uuid\Uuid;
 class UsersController extends Controller {
     
     public function index() {
-        $user = UsersModel::with('employees','roles')->where('deleted_at',null)->get();
+        $user = UsersModel::with('employee','rol')->where('deleted_at',null)->get();
         return $user;
     }
 
     public function getId($id) {
-        $user = UsersModel::with('employees','roles')->where('deleted_at',null)->find($id);
+        $user = UsersModel::with('employee','rol')->where('deleted_at',null)->find($id);
         if (!$user) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }

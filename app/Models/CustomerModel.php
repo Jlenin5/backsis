@@ -7,21 +7,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SaleOrderDetailsModel extends Model {
+class CustomerModel extends Model {
 
     use HasFactory, SoftDeletes, BaseModelFilter;
-    
-    protected $table = 'sale_order_details';
+
+    protected $table = "customers";
 
     protected $fillable = [
-        'product_name',
-        'product_id',
-        'sale_order_id',
-        'price',
-        'quantity',
-        'discount_method',
-        'discount',
-        'total',
+        'first_name',
+        'second_name',
+        'surname',
+        'second_surname',
+        'document_type',
+        'document_number',
+        'email',
+        'phone',
+        'birthdate',
+        'gender',
+        'status',
         'user_create_id',
         'user_update_id'
     ];
@@ -36,7 +39,4 @@ class SaleOrderDetailsModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
-    public function sale_order() {
-        return $this->belongsTo(SaleOrdersModel::class);
-    }
 }

@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Traits\BaseModelFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QuotationsModel extends Model {
+
+    use HasFactory, SoftDeletes, BaseModelFilter;
     
     protected $table = 'quotations';
-    use HasFactory;
 
     protected $fillable = [
-        'id',
         'code',
         'warehouse_id',
-        'client_id',
+        'customer_id',
         'employee_id',
         'start_date',
         'due_date',
@@ -24,25 +26,35 @@ class QuotationsModel extends Model {
         'tax_nate',
         'sub_total',
         'total',
+        'is_accepted',
         'status',
-        'is_accepted'
+        'user_create_id',
+        'user_update_id'
     ];
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
+    public function user_create() {
+        return $this->belongsTo(UsersModel::class, 'user_create_id')->withTrashed();
+    }
+
+    public function user_update() {
+        return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
+    }
 
     public function quote_details() {
         return $this->hasMany(QuoteDetailsModel::class, 'quote_id');
     }
 
-    public function warehouses() {
-        return $this->belongsTo(WarehousesModel::class, 'warehouse_id', 'id');
+    public function warehouse() {
+        return $this->belongsTo(WarehousesModel::class);
     }
 
-    public function clients() {
-        return $this->belongsTo(ClientsModel::class, 'client_id', 'id');
+    public function customer() {
+        return $this->belongsTo(CustomerModel::class);
     }
 
-    public function employees() {
-        return $this->belongsTo(EmployeeModel::class, 'employee_id', 'id');
+    public function employee() {
+        return $this->belongsTo(EmployeeModel::class);
     }
 }

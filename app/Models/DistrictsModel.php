@@ -6,14 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DistrictsModel extends Model {
-    protected $table = 'Districts';
-    protected $primaryKey = 'id';
+
+    protected $table = 'districts';
     public $timestamps = false;
     use HasFactory;
 
     protected $fillable = [
-        'id',
-        'disName',
-        'Province',
+        'name',
+        'province_id',
     ];
 }

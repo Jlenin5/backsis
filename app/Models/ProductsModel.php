@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use App\Traits\BaseModelFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductsModel extends Model {
 
+    use HasFactory, SoftDeletes, BaseModelFilter;
+
     protected $table = 'products';
-    use HasFactory;
 
     protected $fillable = [
         'code',
@@ -20,30 +22,46 @@ class ProductsModel extends Model {
         'stock_alert',
         'purchase_price',
         'sale_price',
+        'product_brand_id',
         'width',
         'height',
         'depth',
         'weight',
+        'liters',
         'web_site',
         'status',
+        'user_create_id',
+        'user_update_id'
     ];
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
+    public function user_create() {
+        return $this->belongsTo(UsersModel::class, 'user_create_id')->withTrashed();
+    }
+
+    public function user_update() {
+        return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
+    }
 
     public function categories() {
         return $this->belongsToMany(CategoriesModel::class, 'product_category', 'product_id', 'category_id')->withPivot('product_id', 'category_id');
     }
 
-    public function productImages() {
+    public function images() {
         return $this->hasMany(ProductImagesModel::class, 'product_id');
     }
 
-    public function product_taxes() {
+    public function tax() {
         return $this->hasOne(ProductTaxesModel::class, 'product_id');
     }
 
     public function unit() {
-        return $this->belongsTo(UnitModel::class, 'unit_id', 'id');
+        return $this->belongsTo(UnitModel::class);
+    }
+
+    public function brand() {
+        return $this->belongsTo(ProductBrandsModel::class);
     }
 
     public function warehouses() {
@@ -51,26 +69,6 @@ class ProductsModel extends Model {
     }
 
     public function quotes() {
-        return $this->belongsToMany(QuotationsModel::class, 'QuoteDetails', 'Product', 'Quotation')->withPivot('Quotation', 'Product');
-    }
-
-    public function reserveStock() {
-        $today = Carbon::today();
-        // $ocpc=Sale::select('ocpc')->wherenotnull('ocpc')->get()->pluck('ocpc');
-        $reserve = QuotationsModel::whereHas("quote_details", function ($query) {
-                $query->where('product_id', $this->id);
-            })
-            ->whereHas('quote_details.quotation', function ($query) use ($today) {
-                $query->whereDate('due_date', '>=', $today);
-                $query->where('status', '<>' ,1);
-            })
-            // ->Wherenotin('ocpc',$ocpc)
-            ->join('quote_details', 'quote_details.quote_id', '=', 'quotations.id')
-            ->join('warehouses', 'warehouses.id', '=', 'quotations.warehouse_id')
-            ->where('quote_details.product_id',$this->id)
-            ->groupBy('quotations.warehouse_id')
-            ->selectRaw('sum(quote_details.quantity) as total, quotations.warehouse_id,warehouses.branch_office_id');
-
-        return $reserve->get();
+        return $this->belongsToMany(QuotationsModel::class, 'quote_details', 'product_id', 'quotation_id')->withPivot('Quotation', 'Product');
     }
 }
