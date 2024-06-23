@@ -4,7 +4,7 @@ namespace App\Traits;
 
 trait ApiResponser {
 
-  static function stored($data = [], $message = "Datos registrados correctamente") {
+  static function stored($data = [], $message = "data_recorded_correctly") {
     return response()->json(['message' => $message, 'data' => $data], 201);
   }
 

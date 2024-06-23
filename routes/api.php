@@ -383,7 +383,7 @@ Route::controller(TicketsController::class)->group(function() {
 });
 Route::controller(UsersController::class)->group(function() {
     Route::get('/user', 'index');
-    Route::get('/user/{id}', 'getId');
+    Route::get('/user/{user}', 'show');
     Route::post('/postuser', 'store');
     Route::put('/updateuser/{id}', 'update');
     Route::delete('/deleteuser/{id}', 'destroy');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Users\Store;
 use App\Models\UsersModel;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
@@ -29,30 +30,19 @@ class UsersController extends Controller {
         );
     }
 
-    public function getId($id) {
-        $user = UsersModel::with('employee','rol')->where('deleted_at',null)->find($id);
-        if (!$user) {
-            return response()->json(['message' => 'No hay datos para mostrar'], 404);
-        }
-        return [$user];
-    }
-
-    public function store(Request $request) {
+    public function store(Store $request) {
+        
         $uuid = Uuid::uuid4();
-        $data = $request->json()->all();
-        $user = new UsersModel;
-        $user->employee_id = $data['employee_id'];
-        $user->display_name = $data['display_name'];
-        $user->display_email = $data['display_email'];
-        $user->password = $data['password'];
-        $user->rol_id = $data['rol_id'];
-        $user->uuid = $uuid->toString();
-        $user->save();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
+        $request['uuid'] = $uuid->toString();
+        $request['password'] = bcrypt(($request->password));
+        $user = UsersModel::create($request->input());
+        $user->syncRoles($request->role_ids);
+
+        return $this->stored($user);
     }
 
     public function show(UsersModel $user) {
-        return $user;
+        return $this->showOne($user->with('employee','rol'));
     }
 
     public function update(Request $request, $id) {
