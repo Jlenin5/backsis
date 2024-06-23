@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests\UsersModel;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -21,9 +21,10 @@ class Store extends FormRequest {
    */
   public function rules() {
     return [
-      'description'           => 'required',
-      'status'                => 'required|in:0,1',
-      'mark_id'               => 'required|exists:marks,id'
+      'display_name'      => 'required',
+      'display_email'     =>  'required|string|email|max:100|unique:users',
+      'password'          =>  'required|string|min:6',
+      'status'            =>  'required|in:1,0'
     ];
   }
 }
