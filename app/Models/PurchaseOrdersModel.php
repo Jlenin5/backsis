@@ -17,7 +17,7 @@ class PurchaseOrdersModel extends Model {
         'code',
         'description',
         'supplier_document',
-        'business_id',
+        'company_id',
         'sede_id',
         'warehouse_id',
         'supplier_id',
@@ -47,8 +47,8 @@ class PurchaseOrdersModel extends Model {
         return $this->hasMany(PurchaseOrderDetailsModel::class, 'purchase_order_id');
     }
 
-    public function business() {
-        return $this->belongsTo(BusinessesModel::class);
+    public function company() {
+        return $this->belongsTo(CompaniesModel::class);
     }
 
     public function sede() {

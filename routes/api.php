@@ -4,7 +4,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AvatarsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ClientsController;
-use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\DocumentContentController;
 use App\Http\Controllers\DocumentStatusController;
@@ -105,14 +105,14 @@ Route::controller(ClientsController::class)->group(function() {
     Route::get('/climax', 'getMaxId');
     Route::delete('/delclimulti', 'destroyMultiple');
 });
-Route::controller(CompanyController::class)->group(function() {
-    Route::get('/com', 'index');
-    Route::get('/com/{id}', 'getId');
-    Route::post('/postcom', 'store');
-    Route::post('/updatecom/{id}', 'update');
-    Route::delete('/deletecom/{id}', 'destroy');
-    Route::get('/commax', 'getMaxId');
-    Route::delete('/delcommulti', 'destroyMultiple');
+Route::controller(CompaniesController::class)->group(function() {
+    Route::get('/companies', 'index');
+    Route::get('/companies/{id}', 'getId');
+    Route::post('/postcompanies', 'store');
+    Route::post('/updatecompanies/{id}', 'update');
+    Route::delete('/deletecompanies/{id}', 'destroy');
+    Route::get('/companiesmax', 'getMaxId');
+    Route::delete('/delcompaniesmulti', 'destroyMultiple');
 });
 Route::controller(CurrenciesController::class)->group(function() {
     Route::get('/cur', 'index');

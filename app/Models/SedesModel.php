@@ -17,7 +17,7 @@ class SedesModel extends Model {
         'name',
         'phone',
         'email',
-        'business_id',
+        'company_id',
         'department_id',
         'province_id',
         'district_id',
@@ -38,8 +38,8 @@ class SedesModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
-    public function business() {
-        return $this->belongsTo(BusinessesModel::class);
+    public function company() {
+        return $this->belongsTo(CompaniesModel::class);
     }
 
     public function employee() {

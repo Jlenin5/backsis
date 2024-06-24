@@ -2,18 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CompanyModel;
+use App\Models\CompaniesModel;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponser;
 
-class CompanyController extends Controller {
+class CompaniesController extends Controller {
+
+    use ApiResponser;
     
-    public function index() {
-        $com = CompanyModel::get();
-        return $com;
+    public function index(Request $request) {
+
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        return $this->getAll(
+            CompaniesModel::where('deleted_at',null)
+                ->whereNull('deleted_at')
+                ->offset($offset)
+                ->limit($perPage)
+                ->orderBy('created_at', 'desc')
+                ->get()
+        );
     }
 
     public function getId($id) {
-        $com = CompanyModel::find($id);
+        $com = CompaniesModel::find($id);
         if (!$com) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -22,7 +37,7 @@ class CompanyController extends Controller {
 
     public function store(Request $request) {
         $data = $request->json()->all();
-        $com = new CompanyModel;
+        $com = new CompaniesModel;
         $com->code = $data['code'];
         if ($request->hasFile('image')) {
             // Genera un nombre de archivo único y guarda la imagen en la carpeta 'images/company'
@@ -44,13 +59,13 @@ class CompanyController extends Controller {
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
 
-    public function show(CompanyModel $com) {
+    public function show(CompaniesModel $com) {
         return $com;
     }
 
     public function update(Request $request, $id) {
         $data = $request->all();
-        $com = CompanyModel::find($id);
+        $com = CompaniesModel::find($id);
         $com->code = $data['code'];
         if ($request->hasFile('image')) {
             // Elimina la imagen anterior si existe
@@ -80,7 +95,7 @@ class CompanyController extends Controller {
     }
 
     public function destroy($id) {
-        $com = CompanyModel::find($id);
+        $com = CompaniesModel::find($id);
         if (!$com) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
@@ -90,7 +105,7 @@ class CompanyController extends Controller {
     }
 
     public function getMaxId() {
-        $ultimoId = CompanyModel::max('id');
+        $ultimoId = CompaniesModel::max('id');
         return response()->json(['ultimo_id' => $ultimoId]);
     }
 
@@ -105,7 +120,7 @@ class CompanyController extends Controller {
         }
 
         foreach ($ids as $id) {
-            CompanyModel::whereId($id)->update([
+            CompaniesModel::whereId($id)->update([
                 'deleted_at' => now(),
             ]);
         }

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class BusinessesModel extends Model {
+class CompaniesModel extends Model {
 
     use HasFactory, SoftDeletes, BaseModelFilter;
 
-    protected $table = 'businesses';
+    protected $table = 'companies';
 
     protected $fillable = [
         'id',

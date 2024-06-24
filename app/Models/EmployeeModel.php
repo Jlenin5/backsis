@@ -19,7 +19,7 @@ class EmployeeModel extends Model {
         'second_name',
         'surname',
         'second_surname',
-        'business_id',
+        'company_id',
         'sede_id',
         'warehouse_id',
         'avatar_id',
@@ -45,8 +45,8 @@ class EmployeeModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
-    public function business() {
-        return $this->belongsTo(BusinessesModel::class);
+    public function company() {
+        return $this->belongsTo(CompaniesModel::class);
     }
 
     public function sede() {
