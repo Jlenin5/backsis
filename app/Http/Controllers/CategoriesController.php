@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Categories\Store;
 use App\Models\CategoriesModel;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CategoriesController extends Controller {
+
+    use ApiResponser;
+
     public function index() {
         $cate = CategoriesModel::get();
         return $cate;
@@ -19,13 +25,12 @@ class CategoriesController extends Controller {
         return [$cate];
     }
 
-    public function store(Request $request) {
-        $data = $request->json()->all();
-        $cate = new CategoriesModel;
-        $cate->name = $data['name'];
-        $cate->status = $data['status'];
-        $cate->save();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
+    public function store(Store $request) {
+        $request['user_create_id'] = auth()->user()->id;
+        $request['user_update_id'] = auth()->user()->id;
+        return $this->stored(
+            CategoriesModel::create($request->input())->withData([])
+        );
     }
 
     public function show(CategoriesModel $cate) {

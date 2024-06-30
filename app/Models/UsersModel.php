@@ -12,18 +12,18 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 
-class UsersModel extends Authenticatable {
+class UsersModel extends Authenticatable implements JWTSubject {
 
     use Notifiable, HasFactory,  SoftDeletes, HasRoles, BaseModelFilter;
     
     protected $table = 'users';
 
     protected $fillable = [
+        'id',
         'employee_id',
-        'display_name',
-        'display_email',
+        'nickname',
+        'email',
         'password',
-        'rol_id',
         'uuid',
         'status',
         'user_create_id',
@@ -45,12 +45,13 @@ class UsersModel extends Authenticatable {
     public function employee() {
         return $this->belongsTo(EmployeeModel::class)->with('avatar');
     }
-
-    public function rol() {
-        return $this->belongsTo(RolesModel::class);
-    }
     
     public function getLicenseAttribute() {
         return SettingsModel::where('key', 'license')->first()->value ?? 'INTEGRAL';
     }
+
+    public function getJWTIdentifier() {
+        return $this->getKey();
+    }
+
 }
