@@ -90,10 +90,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(CategoriesController::class)->group(function () {
     Route::get('/cate', 'index');
-    Route::get('/cate/{id}', 'getId');
+    Route::get('/cate/{categories}', 'show');
     Route::post('/postcate', 'store');
-    Route::put('/updatecate/{id}', 'update');
-    Route::delete('/deletecate/{id}', 'destroy');
+    Route::put('/updatecate/{categories}', 'update');
+    Route::delete('/deletecate/{categories}', 'destroy');
     Route::get('/catemax', 'getMaxId');
     Route::delete('/delcatemulti', 'destroyMultiple');
   });

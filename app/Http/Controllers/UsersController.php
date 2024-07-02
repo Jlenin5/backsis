@@ -2,29 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UsersModel\Store;
+use App\Http\Requests\Users\Store;
 use App\Models\UsersModel;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 use App\Traits\ApiResponser;
+use Illuminate\Support\Facades\Log;
 
 class UsersController extends Controller {
 
     use ApiResponser;
     
-    public function index(Request $request) {
+    public function index() {
 
-        $page = $request->query('page', 1);
-        $perPage = $request->query('per_page', 10);
+        // $page = $request->query('page', 1);
+        // $perPage = $request->query('per_page', 10);
 
-        $offset = ($page - 1) * $perPage;
+        // $offset = ($page - 1) * $perPage;
 
         return $this->getAll(
-            UsersModel::with('employee','rol')
+            UsersModel::withData(['employee','roles'])
                 ->where('deleted_at',null)
                 ->whereNull('deleted_at')
-                ->offset($offset)
-                ->limit($perPage)
+                // ->offset($offset)
+                // ->limit($perPage)
                 ->orderBy('created_at', 'desc')
                 ->get()
         );
@@ -42,7 +43,7 @@ class UsersController extends Controller {
     }
 
     public function show(UsersModel $user) {
-        return $this->showOne($user->with('employee','rol'));
+        return $this->showOne($user->withData(['employee.avatar']));
     }
 
     public function update(Request $request, $id) {

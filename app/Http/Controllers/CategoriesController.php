@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseJson;
 use App\Http\Requests\Categories\Store;
+use App\Http\Requests\Categories\Update;
 use App\Models\CategoriesModel;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
@@ -17,14 +19,6 @@ class CategoriesController extends Controller {
         return $cate;
     }
 
-    public function getId($id) {
-        $cate = CategoriesModel::find($id);
-        if (!$cate) {
-            return response()->json(['message' => 'No hay datos para mostrar'], 404);
-        }
-        return [$cate];
-    }
-
     public function store(Store $request) {
         $request['user_create_id'] = auth()->user()->id;
         $request['user_update_id'] = auth()->user()->id;
@@ -33,26 +27,18 @@ class CategoriesController extends Controller {
         );
     }
 
-    public function show(CategoriesModel $cate) {
-        return $cate;
+    public function show(CategoriesModel $categories) {
+        return $this->showOne($categories->withData([]));
     }
 
-    public function update(Request $request, $id) {
-        $data = $request->json()->all();
-        $cate = CategoriesModel::find($id);
-        $cate->name = $data['name'];
-        $cate->status = $data['status'];
-        $cate->update();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
+    public function update(Update $request, CategoriesModel $categories) {
+        $request['user_update_id'] = auth()->user()->id;
+        $categories->update($request->input());
+        return $this->updated($categories->withData([]));
     }
 
-    public function destroy($id) {
-        $cate = CategoriesModel::find($id);
-        if (!$cate) {
-            return response()->json(['message' => 'Solicitud no encontrada'], 404);
-        }
-        $cate->delete();
-        return response()->json(['message' => 'Eliminado correctamente']);
+    public function destroy(CategoriesModel $categories) {
+        return ResponseJson::destroy($categories->delete());
     }
 
     public function getMaxId() {

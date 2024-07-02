@@ -30,7 +30,7 @@ class UsersModel extends Authenticatable implements JWTSubject {
         'user_update_id'
     ];
 
-    protected $hidden = ['created_at','updated_at','deleted_at','remember_token'];
+    protected $hidden = ['created_at','updated_at','deleted_at','password','remember_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -43,7 +43,7 @@ class UsersModel extends Authenticatable implements JWTSubject {
     }
 
     public function employee() {
-        return $this->belongsTo(EmployeeModel::class)->with('avatar');
+        return $this->belongsTo(EmployeeModel::class);
     }
     
     public function getLicenseAttribute() {

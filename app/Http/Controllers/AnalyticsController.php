@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClientsModel;
+use App\Models\CustomerModel;
 use App\Models\EmployeeModel;
 use App\Models\SuppliersModel;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 
 class AnalyticsController extends Controller {
+
+    use ApiResponser;
     
     public function audience() {
 
-        $clients = ClientsModel::where('status',1)->whereNull('deleted_at')->get();
+        $clients = CustomerModel::where('status',1)->whereNull('deleted_at')->get();
         $employees = EmployeeModel::where('status',1)->whereNull('deleted_at')->get();
         $suppliers = SuppliersModel::where('status',1)->whereNull('deleted_at')->get();
 
