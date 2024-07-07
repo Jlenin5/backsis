@@ -4,7 +4,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvatarsController;
 use App\Http\Controllers\CategoriesController;
-use App\Http\Controllers\ClientsController;
+use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\CurrenciesController;
 use App\Http\Controllers\DocumentContentController;
@@ -105,14 +105,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/carrmax', 'getMaxId');
     Route::delete('/delcarrmulti', 'destroyMultiple');
   });
-  Route::controller(ClientsController::class)->group(function () {
-    Route::get('/cli', 'index');
-    Route::get('/cli/{id}', 'getId');
-    Route::post('/postcli', 'store');
-    Route::put('/updatecli/{id}', 'update');
-    Route::delete('/deletecli/{id}', 'destroy');
-    Route::get('/climax', 'getMaxId');
-    Route::delete('/delclimulti', 'destroyMultiple');
+  Route::controller(CustomersController::class)->group(function () {
+    Route::get('/customers', 'index');
+    Route::get('/customers/{customers}', 'show');
+    Route::post('/postcustomers', 'store');
+    Route::put('/updatecustomers/{customers}', 'update');
+    Route::delete('/deletecustomers/{customers}', 'destroy');
+    Route::delete('/delcustomersmulti', 'destroyMultiple');
   });
   Route::controller(CompaniesController::class)->group(function () {
     Route::get('/companies', 'index');
