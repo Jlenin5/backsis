@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseJson;
+use App\Http\Requests\Companies\Store;
+use App\Http\Requests\Companies\Update;
 use App\Models\CompaniesModel;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponser;
@@ -18,55 +21,45 @@ class CompaniesController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         return $this->getAll(
-            CompaniesModel::where('deleted_at',null)
+            CompaniesModel::search(['name','phone'])
                 ->whereNull('deleted_at')
+                ->with(['employee'])
                 ->offset($offset)
                 ->limit($perPage)
                 ->orderBy('created_at', 'desc')
-                ->get()
+                ->get(),
+            CompaniesModel::whereNull('deleted_at')->count()
         );
     }
 
-    public function getId($id) {
-        $com = CompaniesModel::find($id);
-        if (!$com) {
-            return response()->json(['message' => 'No hay datos para mostrar'], 404);
-        }
-        return [$com];
-    }
-
-    public function store(Request $request) {
+    public function store(Store $request) {
+        $request['user_create_id'] = auth()->user()->id;
+        $request['user_update_id'] = auth()->user()->id;
         $data = $request->json()->all();
         $com = new CompaniesModel;
-        $com->code = $data['code'];
         if ($request->hasFile('image')) {
             // Genera un nombre de archivo único y guarda la imagen en la carpeta 'images/company'
             $currentDate = now()->format('Y-m-d');
             $companyCode = $data['code'];
             $uniqueFilename = md5($currentDate . $companyCode) . "." . $request->file('image')->getClientOriginalExtension();
             $request->file('image')->move('images/company', $uniqueFilename);
-            $com->image = $uniqueFilename;
+            $request['image'] = $uniqueFilename;
         } else {
-            $com->image = '';
+            $request['image'] = '';
         }
-        $com->name = $data['name'];
-        $com->document_number = $data['document_number'];
-        $com->email = $data['email'];
-        $com->address = $data['address'];
-        $com->web_site = $data['web_site'];
-        $com->phone = $data['phone'];
-        $com->save();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
+        return $this->stored(
+            CompaniesModel::create($request->input())->withData([])
+        );
     }
 
-    public function show(CompaniesModel $com) {
-        return $com;
+    public function show(CompaniesModel $companies) {
+        return $this->showOne($companies->withData([]));
     }
 
-    public function update(Request $request, $id) {
+    public function update(Update $request, CompaniesModel $companies) {
+        $request['user_update_id'] = auth()->user()->id;
         $data = $request->all();
-        $com = CompaniesModel::find($id);
-        $com->code = $data['code'];
+        $com = CompaniesModel::find($data['id']);
         if ($request->hasFile('image')) {
             // Elimina la imagen anterior si existe
             if (!empty($com->image)) {
@@ -80,28 +73,16 @@ class CompaniesController extends Controller {
             $companyCode = $data['code'];
             $uniqueFilename = md5($currentDate . $companyCode) . "." . $request->file('image')->getClientOriginalExtension();
             $request->file('image')->move('images/company', $uniqueFilename);
-            $com->image = $uniqueFilename;
+            $request['image'] = $uniqueFilename;
         } else {
-            $com->image = $request->image;
+            $request['image'] = $request->image;
         }
-        $com->name = $data['name'];
-        $com->document_number = $data['document_number'];
-        $com->email = $data['email'];
-        $com->address = $data['address'];
-        $com->web_site = $data['web_site'];
-        $com->phone = $data['phone'];
-        $com->update();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
+        $companies->update($request->input());
+        return $this->updated($companies->withData([]));
     }
 
-    public function destroy($id) {
-        $com = CompaniesModel::find($id);
-        if (!$com) {
-            return response()->json(['message' => 'Solicitud no encontrada'], 404);
-        }
-        $com->deleted_at = now();
-        $com->update();
-        return response()->json(['message' => 'Eliminado correctamente']);
+    public function destroy(CompaniesModel $companies) {
+        return ResponseJson::destroy($companies->delete());
     }
 
     public function getMaxId() {

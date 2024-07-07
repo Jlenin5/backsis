@@ -117,10 +117,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(CompaniesController::class)->group(function () {
     Route::get('/companies', 'index');
-    Route::get('/companies/{id}', 'getId');
+    // Route::get('/companies/{companies}', 'show');
     Route::post('/postcompanies', 'store');
-    Route::post('/updatecompanies/{id}', 'update');
-    Route::delete('/deletecompanies/{id}', 'destroy');
+    Route::put('/updatecompanies/{companies}', 'update');
+    Route::delete('/deletecompanies/{companies}', 'destroy');
     Route::get('/companiesmax', 'getMaxId');
     Route::delete('/delcompaniesmulti', 'destroyMultiple');
   });
@@ -128,7 +128,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/cur', 'index');
     Route::get('/cur/{id}', 'getId');
     Route::post('/postcur', 'store');
-    Route::post('/updatecur/{id}', 'update');
+    Route::put('/updatecur/{id}', 'update');
     Route::delete('/deletecur/{id}', 'destroy');
     Route::get('/curmax', 'getMaxId');
     Route::delete('/delcurmulti', 'destroyMultiple');
@@ -142,7 +142,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/doco', 'index');
     Route::get('/doco/{id}', 'getId');
     Route::post('/postdoco', 'store');
-    Route::post('/updatedoco/{id}', 'update');
+    Route::put('/updatedoco/{id}', 'update');
     Route::delete('/deletedoco/{id}', 'destroy');
     Route::get('/docomax', 'getMaxId');
     Route::delete('/deldocomulti', 'destroyMultiple');
@@ -151,7 +151,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/dost', 'index');
     Route::get('/dost/{id}', 'getId');
     Route::post('/postdost', 'store');
-    Route::post('/updatedost/{id}', 'update');
+    Route::put('/updatedost/{id}', 'update');
     Route::delete('/deletedost/{id}', 'destroy');
     Route::get('/dostmax', 'getMaxId');
     Route::delete('/deldostmulti', 'destroyMultiple');
@@ -329,7 +329,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/rol', 'index');
     Route::get('/rol/{id}', 'getId');
     Route::post('/postrol', 'store');
-    Route::post('/updaterol/{id}', 'update');
+    Route::put('/updaterol/{id}', 'update');
     Route::delete('/deleterol/{id}', 'destroy');
     Route::get('/rolmax', 'getMaxId');
     Route::delete('/delrolmulti', 'destroyMultiple');
@@ -350,7 +350,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/sn', 'index');
     Route::get('/sn/{id}', 'getId');
     Route::post('/postsn', 'store');
-    Route::post('/updatesn/{id}', 'update');
+    Route::put('/updatesn/{id}', 'update');
     Route::delete('/deletesn/{id}', 'destroy');
     Route::get('/snmax', 'getMaxId');
     Route::delete('/delsnmulti', 'destroyMultiple');

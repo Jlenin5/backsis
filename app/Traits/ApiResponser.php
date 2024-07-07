@@ -36,11 +36,11 @@ trait ApiResponser {
     return response()->json(['message' => $message, 'data' => $data]);
   }
 
-  static function getAll($data, $message = "success") {
+  static function getAll($data, $totalRows, $message = "success") {
     if (request()->paginate) {
-      return response()->json($data, 200);
+      return response()->json([$data, $totalRows, 200]);
     }
-    return response()->json(['message' => $message, 'data' => $data], 200);
+    return response()->json(['message' => $message, 'data' => $data, 'totalRows' => $totalRows], 200);
   }
 
   static function unauthorized($message = 'No estas autorizado', $data = []) {
