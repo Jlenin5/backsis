@@ -19,7 +19,7 @@ class WarehousesModel extends Model {
         'phone',
         'email',
         'company_id',
-        'sede_id',
+        'branch_office_id',
         'department_id',
         'district_id',
         'province_id',
@@ -48,8 +48,8 @@ class WarehousesModel extends Model {
         return $this->belongsTo(CompaniesModel::class);
     }
 
-    public function sede() {
-        return $this->belongsTo(SedesModel::class);
+    public function branch_office() {
+        return $this->belongsTo(BranchOfficesModel::class);
     }
 
     public function employee() {

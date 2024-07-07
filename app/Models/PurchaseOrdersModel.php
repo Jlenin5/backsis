@@ -18,7 +18,7 @@ class PurchaseOrdersModel extends Model {
         'description',
         'supplier_document',
         'company_id',
-        'sede_id',
+        'branch_office_id',
         'warehouse_id',
         'supplier_id',
         'employee_id',
@@ -51,8 +51,8 @@ class PurchaseOrdersModel extends Model {
         return $this->belongsTo(CompaniesModel::class);
     }
 
-    public function sede() {
-        return $this->belongsTo(SedesModel::class);
+    public function branch_office() {
+        return $this->belongsTo(BranchOfficesModel::class);
     }
 
     public function warehouse() {

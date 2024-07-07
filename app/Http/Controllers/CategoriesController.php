@@ -41,11 +41,6 @@ class CategoriesController extends Controller {
         return ResponseJson::destroy($categories->delete());
     }
 
-    public function getMaxId() {
-        $ultimoId = CategoriesModel::max('id');
-        return response()->json(['ultimo_id' => $ultimoId]);
-    }
-
     public function destroyMultiple(Request $request) {
         $ids = $request->input('dataId', []);
         if (empty($ids)) {

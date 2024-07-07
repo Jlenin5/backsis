@@ -96,7 +96,7 @@ trait BaseModelFilter {
                     $point = '';
 
                 switch ($search_filter[0]) {
-                    case 'sede_id':
+                    case 'branch_office_id':
                     case 'company_id':
                         $relation_exists=true;
                         $point='';

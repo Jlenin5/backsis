@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SedesModel extends Model {
+class BranchOfficesModel extends Model {
 
     use HasFactory, SoftDeletes, BaseModelFilter;
 
-    protected $table = 'sedes';
+    protected $table = 'branch_offices';
 
     protected $fillable = [
         'name',

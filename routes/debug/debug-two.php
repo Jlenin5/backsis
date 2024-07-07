@@ -72,10 +72,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(BranchOfficesController::class)->group(function () {
     Route::get('/bo', 'index');
-    Route::get('/bo/{id}', 'getId');
+    Route::get('/bo/{branch_offices}', 'getId');
     Route::post('/postbo', 'store');
-    Route::put('/updatebo/{id}', 'update');
-    Route::delete('/deletebo/{id}', 'destroy');
+    Route::put('/updatebo/{branch_offices}', 'update');
+    Route::delete('/deletebo/{branch_offices}', 'destroy');
     Route::get('/bomax', 'getMaxId');
     Route::delete('/delbomulti', 'destroyMultiple');
   });

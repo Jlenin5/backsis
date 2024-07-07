@@ -85,11 +85,6 @@ class CompaniesController extends Controller {
         return ResponseJson::destroy($companies->delete());
     }
 
-    public function getMaxId() {
-        $ultimoId = CompaniesModel::max('id');
-        return response()->json(['ultimo_id' => $ultimoId]);
-    }
-
     public function destroyMultiple(Request $request) {
         $ids = $request->input('dataId', []);
         if (empty($ids)) {
