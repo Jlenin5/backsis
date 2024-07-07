@@ -72,11 +72,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(BranchOfficesController::class)->group(function () {
     Route::get('/bo', 'index');
-    Route::get('/bo/{branch_offices}', 'getId');
+    Route::get('/bo/{branch_offices}', 'show');
     Route::post('/postbo', 'store');
     Route::put('/updatebo/{branch_offices}', 'update');
     Route::delete('/deletebo/{branch_offices}', 'destroy');
-    Route::get('/bomax', 'getMaxId');
     Route::delete('/delbomulti', 'destroyMultiple');
   });
   Route::controller(BranchOfficeStaffController::class)->group(function () {
@@ -117,11 +116,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(CompaniesController::class)->group(function () {
     Route::get('/companies', 'index');
-    // Route::get('/companies/{companies}', 'show');
+    Route::get('/companies/{companies}', 'show');
     Route::post('/postcompanies', 'store');
     Route::put('/updatecompanies/{companies}', 'update');
     Route::delete('/deletecompanies/{companies}', 'destroy');
-    Route::get('/companiesmax', 'getMaxId');
     Route::delete('/delcompaniesmulti', 'destroyMultiple');
   });
   Route::controller(CurrenciesController::class)->group(function () {
@@ -402,11 +400,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(WarehousesController::class)->group(function () {
     Route::get('/warehouse', 'index');
-    Route::get('/warehouse/{id}', 'getId');
+    Route::get('/warehouse/{warehouse}', 'show');
     Route::post('/postwarehouse', 'store');
     Route::put('/updatewarehouse/{id}', 'update');
     Route::delete('/deletewarehouse/{id}', 'destroy');
-    Route::get('/warehousemax', 'getMaxId');
     Route::delete('/delwarehousemulti', 'destroyMultiple');
   });
   Route::controller(WorkAreaController::class)->group(function () {
