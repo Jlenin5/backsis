@@ -391,9 +391,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', 'index');
     Route::get('/user/{user}', 'show');
     Route::post('/postuser', 'store');
-    Route::put('/updateuser/{id}', 'update');
-    Route::delete('/deleteuser/{id}', 'destroy');
-    Route::get('/usermax', 'getMaxId');
+    Route::put('/updateuser/{user}', 'update');
+    Route::delete('/deleteuser/{user}', 'destroy');
     Route::delete('/delusermulti', 'destroyMultiple');
   });
   Route::controller(WarehousesController::class)->group(function () {

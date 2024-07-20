@@ -20,5 +20,5 @@ class RolesModel extends SpatieRole {
         'guard_name',
     ];
 
-    protected $hidden = ['guard_name','created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['pivot','guard_name','created_at', 'updated_at', 'deleted_at'];
 }   

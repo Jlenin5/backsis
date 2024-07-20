@@ -46,6 +46,17 @@ class UsersModel extends Authenticatable implements JWTSubject {
         return $this->belongsTo(EmployeeModel::class);
     }
     
+    public function scopeFilterRoles($query) {
+        if (request()->has('roles')) {
+            return $query->whereHas('roles', function ($query) {
+                $a = explode(',', request()->input('roles'));
+                $query->whereIn('id', $a);
+
+            });
+         }
+        return $query;
+    }
+
     public function getLicenseAttribute() {
         return SettingsModel::where('key', 'license')->first()->value ?? 'INTEGRAL';
     }
