@@ -7,8 +7,11 @@ use App\Http\Requests\Employees\Store;
 use App\Http\Requests\Employees\Update;
 use App\Models\EmployeeModel;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponser;
 
 class EmployeeController extends Controller {
+
+    use ApiResponser;
 
     public function index(Request $request) {
         $page = $request->query('page', 1);
