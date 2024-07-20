@@ -164,11 +164,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(EmployeeController::class)->group(function () {
     Route::get('/emp', 'index');
-    Route::get('/emp/{id}', 'getId');
+    Route::get('/emp/{employee}', 'show');
     Route::post('/postemp', 'store');
-    Route::put('/updateemp/{id}', 'update');
-    Route::delete('/deleteemp/{id}', 'destroy');
-    Route::get('/empmax', 'getMaxId');
+    Route::put('/updateemp/{employee}', 'update');
+    Route::delete('/deleteemp/{employee}', 'destroy');
     Route::delete('/delempmulti', 'destroyMultiple');
   });
   Route::controller(InvoiceDetailsController::class)->group(function () {

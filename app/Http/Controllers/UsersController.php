@@ -24,7 +24,6 @@ class UsersController extends Controller {
 
         return $this->getAll(
             UsersModel::withDataAll(['employee','roles'])
-                ->where('deleted_at',null)
                 ->whereNull('deleted_at')
                 ->offset($offset)
                 ->limit($perPage)
@@ -51,7 +50,6 @@ class UsersController extends Controller {
 
     public function update(Update $request, UsersModel $user) {
         $request['user_update_id'] = auth()->user()->id;
-        $request['user_id'] = auth()->user()->id;
         $user->update($request->input());
         return $this->updated($user->withData([]));
     }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseJson;
+use App\Http\Requests\Employees\Store;
+use App\Http\Requests\Employees\Update;
 use App\Models\EmployeeModel;
 use Illuminate\Http\Request;
 
@@ -10,87 +13,40 @@ class EmployeeController extends Controller {
     public function index(Request $request) {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+
         $offset = ($page - 1) * $perPage;
-        $emp = EmployeeModel::with('avatar','work_area','job_position')->where('deleted_at',null)
-            ->offset($offset)
-            ->limit($perPage)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $totalRows = EmployeeModel::whereNull('deleted_at')->count();
-            
-        return response()->json([
-            'data' => $emp,
-            'totalRows' => $totalRows
-        ]);
+
+        return $this->getAll(
+            EmployeeModel::withDataAll(['avatar','work_area','job_position'])
+                ->whereNull('deleted_at')
+                ->offset($offset)
+                ->limit($perPage)
+                ->orderBy('created_at', 'desc')
+                ->get(),
+            EmployeeModel::whereNull('deleted_at')->count()
+        );
     }
 
-    public function getId($id) {
-        $emp = EmployeeModel::with('avatar','work_area','job_position')->where('deleted_at',null)->findOrFail($id);
-        if (!$emp) {
-            return response()->json(['message' => 'No hay datos para mostrar'], 404);
-        }
-        return $emp;
+    public function show(EmployeeModel $employee) {
+        return $this->showOne($employee->withData([]));
     }
 
-    public function store(Request $request) {
-        $data = $request->json()->all();
-        $emp = new EmployeeModel;
-        $emp->image = $data['image'];
-        $emp->first_name = $data['first_name'];
-        $emp->second_name = $data['second_name'];
-        $emp->surname = $data['surname'];
-        $emp->second_surname = $data['second_surname'];
-        $emp->avatar_id = $data['avatar_id'];
-        $emp->work_area_id = $data['work_area_id'];
-        $emp->job_position_id = $data['job_position_id'];
-        $emp->document_type = $data['document_type'];
-        $emp->document_number = $data['document_number'];
-        $emp->email = $data['email'];
-        $emp->phone = $data['phone'];
-        $emp->gender = $data['gender'];
-        $emp->status = $data['status'];
-        $emp->save();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
+    public function store(Store $request) {
+        $request['user_create_id'] = auth()->user()->id;
+        $request['user_update_id'] = auth()->user()->id;
+        return $this->stored(
+            EmployeeModel::create($request->input())->withData([])
+        );
     }
 
-    public function show(EmployeeModel $emp) {
-        return $emp;
+    public function update(Update $request, EmployeeModel $employee) {
+        $request['user_update_id'] = auth()->user()->id;
+        $employee->update($request->input());
+        return $this->updated($employee->withData([]));
     }
 
-    public function update(Request $request, $id) {
-        $data = $request->json()->all();
-        $emp = EmployeeModel::find($id);
-        $emp->image = $data['image'];
-        $emp->first_name = $data['first_name'];
-        $emp->second_name = $data['second_name'];
-        $emp->surname = $data['surname'];
-        $emp->second_surname = $data['second_surname'];
-        $emp->avatar_id = $data['avatar_id'];
-        $emp->work_area_id = $data['work_area_id'];
-        $emp->job_position_id = $data['job_position_id'];
-        $emp->document_type = $data['document_type'];
-        $emp->document_number = $data['document_number'];
-        $emp->email = $data['email'];
-        $emp->phone = $data['phone'];
-        $emp->gender = $data['gender'];
-        $emp->status = $data['status'];
-        $emp->update();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
-    }
-
-    public function destroy($id) {
-        $emp = EmployeeModel::find($id);
-        if (!$emp) {
-            return response()->json(['message' => 'Solicitud no encontrada'], 404);
-        }
-        $emp->deleted_at = now();
-        $emp->update();
-        return response()->json(['message' => 'Eliminado correctamente']);
-    }
-
-    public function getMaxId() {
-        $ultimoId = EmployeeModel::max('id');
-        return response()->json(['ultimo_id' => $ultimoId]);
+    public function destroy(EmployeeModel $employee) {
+        return ResponseJson::destroy($employee->delete());
     }
 
     public function destroyMultiple(Request $request) {
