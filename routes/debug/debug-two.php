@@ -354,11 +354,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(SuppliersController::class)->group(function () {
     Route::get('/supp', 'index');
-    Route::get('/supp/{id}', 'getId');
+    Route::get('/supp/{suppliers}', 'show');
     Route::post('/postsupp', 'store');
-    Route::put('/updatesupp/{id}', 'update');
-    Route::delete('/deletesupp/{id}', 'destroy');
-    Route::get('/suppmax', 'getMaxId');
+    Route::put('/updatesupp/{suppliers}', 'update');
+    Route::delete('/deletesupp/{suppliers}', 'destroy');
     Route::delete('/delsuppmulti', 'destroyMultiple');
   });
   Route::controller(TaxesController::class)->group(function () {

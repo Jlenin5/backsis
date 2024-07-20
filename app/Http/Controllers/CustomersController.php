@@ -22,7 +22,7 @@ class CustomersController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         return $this->getAll(
-            CustomerModel::search(['name','phone'])
+            CustomerModel::search(['first_name','document_number'])
                 ->whereNull('deleted_at')
                 ->offset($offset)
                 ->limit($perPage)
