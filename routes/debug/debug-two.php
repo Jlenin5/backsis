@@ -93,7 +93,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/postcate', 'store');
     Route::put('/updatecate/{categories}', 'update');
     Route::delete('/deletecate/{categories}', 'destroy');
-    Route::get('/catemax', 'getMaxId');
     Route::delete('/delcatemulti', 'destroyMultiple');
   });
   Route::controller(CarriersController::class)->group(function () {

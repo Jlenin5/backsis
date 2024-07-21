@@ -14,9 +14,20 @@ class CategoriesController extends Controller {
 
     use ApiResponser;
 
-    public function index() {
-        $cate = CategoriesModel::get();
-        return $cate;
+    public function index(Request $request) {
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
+
+        $offset = ($page - 1) * $perPage;
+
+        return $this->getAll(
+            CategoriesModel::whereNull('deleted_at')
+                ->offset($offset)
+                ->limit($perPage)
+                ->orderBy('created_at', 'desc')
+                ->get(),
+            CategoriesModel::whereNull('deleted_at')->count()
+        );
     }
 
     public function store(Store $request) {
