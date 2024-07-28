@@ -32,6 +32,7 @@ use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\BranchOfficesController;
 use App\Http\Controllers\BranchOfficeStaffController;
+use App\Http\Controllers\BrandsController;
 use App\Http\Controllers\CarriersController;
 use App\Http\Controllers\JobPositionController;
 use App\Http\Controllers\MobilitiesController;
@@ -86,6 +87,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/deletebos/{id}', 'destroy');
     Route::get('/bosmax', 'getMaxId');
     Route::delete('/delbosmulti', 'destroyMultiple');
+  });
+  Route::controller(BrandsController::class)->group(function () {
+    Route::get('/brands', 'index');
+    Route::get('/brands/{brands}', 'show');
+    Route::post('/post_brands', 'store');
+    Route::put('/update_brands/{brands}', 'update');
+    Route::delete('/delete_brands/{brands}', 'destroy');
+    Route::delete('/delbrandsmulti', 'destroyMultiple');
   });
   Route::controller(CategoriesController::class)->group(function () {
     Route::get('/cate', 'index');
