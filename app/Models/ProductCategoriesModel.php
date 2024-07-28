@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ProductCategoryModel extends Model {
+class ProductCategoriesModel extends Model {
 
     use HasFactory, SoftDeletes, BaseModelFilter;
 
-    protected $table = "product_category";
+    protected $table = "product_categories";
 
     protected $fillable = [
         'product_id',
@@ -28,6 +28,14 @@ class ProductCategoryModel extends Model {
 
     public function user_update() {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
+    }
+
+    public function category() {
+        return $this->belongsTo(CategoriesModel::class);
+    }
+
+    public function product() {
+        return $this->belongsTo(ProductsModel::class);
     }
     
 }

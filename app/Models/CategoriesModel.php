@@ -31,6 +31,6 @@ class CategoriesModel extends Model {
     }
 
     public function products() {
-        return $this->belongsToMany(ProductsModel::class, 'ProductCategory', 'Category', 'Product')->withPivot('Product', 'Category');
+        return $this->belongsToMany(ProductsModel::class, 'product_categories');
     }
 }

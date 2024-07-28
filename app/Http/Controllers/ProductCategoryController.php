@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductCategoryModel;
+use App\Models\ProductCategoriesModel;
 use Illuminate\Http\Request;
 
 class ProductCategoryController extends Controller {
     public function index() {
-        $prca = ProductCategoryModel::get();
+        $prca = ProductCategoriesModel::get();
         return $prca;
     }
 
     public function getId($id) {
-        $prca = ProductCategoryModel::find($id);
+        $prca = ProductCategoriesModel::find($id);
         if (!$prca) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
@@ -21,7 +21,7 @@ class ProductCategoryController extends Controller {
 
     public function store(Request $request) {
         $data = $request->json()->all();
-        $prca = new ProductCategoryModel;
+        $prca = new ProductCategoriesModel;
         $prca->id = $data['id'];
         $prca->Product = $data['Product'];
         $prca->Category = $data['Category'];
@@ -29,13 +29,13 @@ class ProductCategoryController extends Controller {
         return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
     }
 
-    public function show(ProductCategoryModel $prca) {
+    public function show(ProductCategoriesModel $prca) {
         return $prca;
     }
 
     public function update(Request $request, $id) {
         $data = $request->json()->all();
-        $prca = ProductCategoryModel::find($id);
+        $prca = ProductCategoriesModel::find($id);
         $prca->Product = $data['Product'];
         $prca->Category = $data['Category'];
         $prca->update();
@@ -43,7 +43,7 @@ class ProductCategoryController extends Controller {
     }
 
     public function destroy($id) {
-        $prca = ProductCategoryModel::find($id);
+        $prca = ProductCategoriesModel::find($id);
         if (!$prca) {
             return response()->json(['message' => 'Solicitud no encontrada'], 404);
         }
@@ -52,7 +52,7 @@ class ProductCategoryController extends Controller {
     }
 
     public function getMaxId() {
-        $ultimoId = ProductCategoryModel::max('id');
+        $ultimoId = ProductCategoriesModel::max('id');
         return response()->json(['ultimo_id' => $ultimoId]);
     }
 
@@ -65,7 +65,7 @@ class ProductCategoryController extends Controller {
                 'message' => 'No se proporcionaron datos para eliminar.'
             ], 400);
         }
-        ProductCategoryModel::whereIn('id', $ids)->delete();
+        ProductCategoriesModel::whereIn('id', $ids)->delete();
         return response()->json([
             'code' => 200,
             'status' => 'success',

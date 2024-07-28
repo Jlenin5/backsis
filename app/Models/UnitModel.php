@@ -11,7 +11,7 @@ class UnitModel extends Model {
 
     use HasFactory, SoftDeletes, BaseModelFilter;
 
-    protected $table = 'units';
+    protected $table = 'measurement_units';
 
     protected $fillable = [
         'name',

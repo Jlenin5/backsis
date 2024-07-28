@@ -45,7 +45,7 @@ class ProductsModel extends Model {
     }
 
     public function categories() {
-        return $this->belongsToMany(CategoriesModel::class, 'product_category', 'product_id', 'category_id')->withPivot('product_id', 'category_id');
+        return $this->belongsToMany(CategoriesModel::class, 'product_categories', 'product_id', 'category_id');
     }
 
     public function images() {
@@ -65,10 +65,10 @@ class ProductsModel extends Model {
     }
 
     public function warehouses() {
-        return $this->belongsToMany(WarehousesModel::class, 'product_warehouse', 'product_id', 'warehouse_id')->withPivot('product_id', 'warehouse_id');
+        // return $this->belongsToMany(WarehousesModel::class, 'product_warehouse', 'product_id', 'warehouse_id')->withPivot('product_id', 'warehouse_id');
     }
 
     public function quotes() {
-        return $this->belongsToMany(QuotationsModel::class, 'quote_details', 'product_id', 'quotation_id')->withPivot('Quotation', 'Product');
+        // return $this->belongsToMany(QuotationsModel::class, 'quote_details', 'product_id', 'quotation_id')->withPivot('Quotation', 'Product');
     }
 }

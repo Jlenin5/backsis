@@ -260,7 +260,7 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(ProductsController::class)->group(function () {
     Route::get('/prod', 'index');
-    Route::get('/prod/{id}', 'getId');
+    Route::get('/prod/{product}', 'show');
     Route::post('/postprod', 'store');
     Route::post('/updateprod', 'update');
     Route::delete('/deleteprod/{id}', 'destroy');
