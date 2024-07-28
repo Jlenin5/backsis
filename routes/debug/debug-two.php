@@ -20,7 +20,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductImagesController;
 use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\UnitController;
+use App\Http\Controllers\MeasurementUnitController;
 use App\Http\Controllers\ProductBranchOfficeController;
 use App\Http\Controllers\QuotationsController;
 use App\Http\Controllers\QuoteDetailsController;
@@ -268,13 +268,12 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/delprodmulti', 'destroyMultiple');
     Route::get('/prodfeatured/{featured}', 'featuredId');
   });
-  Route::controller(UnitController::class)->group(function () {
-    Route::get('/unit', 'index');
-    Route::get('/unit/{id}', 'getId');
-    Route::post('/postunit', 'store');
-    Route::put('/updateunit/{id}', 'update');
-    Route::delete('/deleteunit/{id}', 'destroy');
-    Route::get('/unitmax', 'getMaxId');
+  Route::controller(MeasurementUnitController::class)->group(function () {
+    Route::get('/measurement_unit', 'index');
+    Route::get('/measurement_unit/{measurement_unit}', 'show');
+    Route::post('/post_measurement_unit', 'store');
+    Route::put('/update_measurement_unit/{measurement_unit}', 'update');
+    Route::delete('/delete_measurement_unit/{measurement_unit}', 'destroy');
     Route::delete('/delunitmulti', 'destroyMultiple');
   });
   Route::controller(ProductBranchOfficeController::class)->group(function () {

@@ -57,7 +57,7 @@ class ProductsModel extends Model {
     }
 
     public function unit() {
-        return $this->belongsTo(UnitModel::class);
+        return $this->belongsTo(MeasurementUnitModel::class);
     }
 
     public function brand() {
