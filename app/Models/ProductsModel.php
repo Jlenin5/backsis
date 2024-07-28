@@ -22,7 +22,7 @@ class ProductsModel extends Model {
         'stock_alert',
         'purchase_price',
         'sale_price',
-        'product_brand_id',
+        'brand_id',
         'width',
         'height',
         'depth',
@@ -61,7 +61,7 @@ class ProductsModel extends Model {
     }
 
     public function brand() {
-        return $this->belongsTo(ProductBrandsModel::class);
+        return $this->belongsTo(BrandsModel::class);
     }
 
     public function warehouses() {

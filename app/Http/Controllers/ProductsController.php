@@ -33,7 +33,8 @@ class ProductsController extends Controller {
                     'categories',
                     'images',
                     'tax',
-                    'unit'
+                    'unit',
+                    'brand'
                 )
                 ->whereNull('deleted_at')
                 ->offset($offset)
@@ -49,7 +50,8 @@ class ProductsController extends Controller {
             'categories',
             'images',
             'tax',
-            'unit'
+            'unit',
+            'brand'
         ]));
     }
 
@@ -84,7 +86,7 @@ class ProductsController extends Controller {
             }
         }
 
-        $tax = $product_data['product_taxes'];
+        $tax = $product_data['tax'];
         $productTax = new ProductTaxesModel([
             'product_id' => $prod['id'],
             'igv' => (bool)$tax['igv'],
@@ -125,6 +127,7 @@ class ProductsController extends Controller {
         $prod->stock_alert = $product_data['stock_alert'];
         $prod->purchase_price = $product_data['purchase_price'];
         $prod->sale_price = $product_data['sale_price'];
+        $prod->brand_id = $product_data['brand_id'];
         $prod->width = $product_data['width'];
         $prod->height = $product_data['height'];
         $prod->depth = $product_data['depth'];
