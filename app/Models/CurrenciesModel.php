@@ -2,18 +2,25 @@
 
 namespace App\Models;
 
+use App\Traits\BaseModelFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CurrenciesModel extends Model {
-    protected $table = 'Currencies';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
-    use HasFactory;
+
+    use HasFactory, SoftDeletes, BaseModelFilter;
+    
+    protected $table = 'currencies';
 
     protected $fillable = [
-        'id',
-        'curName',
-        'curConvert',
+        'name',
+        'code',
+        'symbol',
+        'status',
+        'user_create_id',
+        'user_update_id'
     ];
+
+    protected $hidden = ['created_at','updated_at','deleted_at'];
 }

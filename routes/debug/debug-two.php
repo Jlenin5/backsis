@@ -130,12 +130,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/delcompaniesmulti', 'destroyMultiple');
   });
   Route::controller(CurrenciesController::class)->group(function () {
-    Route::get('/cur', 'index');
-    Route::get('/cur/{id}', 'getId');
-    Route::post('/postcur', 'store');
-    Route::put('/updatecur/{id}', 'update');
-    Route::delete('/deletecur/{id}', 'destroy');
-    Route::get('/curmax', 'getMaxId');
+    Route::get('/currencies', 'index');
+    Route::get('/currencies/{currency}', 'show');
+    Route::post('/post_currencies', 'store');
+    Route::put('/update_currencies/{currency}', 'update');
+    Route::delete('/delete_currencies/{currency}', 'destroy');
     Route::delete('/delcurmulti', 'destroyMultiple');
   });
   Route::controller(UbigeoController::class)->group(function () {
