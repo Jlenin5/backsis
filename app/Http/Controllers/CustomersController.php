@@ -8,7 +8,6 @@ use App\Http\Requests\Customers\Update;
 use App\Models\CustomerModel;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponser;
-use Carbon\Carbon;
 
 class CustomersController extends Controller {
 
@@ -33,9 +32,6 @@ class CustomersController extends Controller {
     }
 
     public function store(Store $request) {
-        $data = $request->json()->all();
-        $birthdate = Carbon::parse($data['birthdate']);
-        $request['birthdate'] = $birthdate->format('Y-m-d');
         $request['user_create_id'] = auth()->user()->id;
         $request['user_update_id'] = auth()->user()->id;
         return $this->stored(
@@ -48,9 +44,6 @@ class CustomersController extends Controller {
     }
 
     public function update(Update $request, CustomerModel $customers) {
-        $data = $request->json()->all();
-        $birthdate = Carbon::parse($data['birthdate']);
-        $request['birthdate'] = $birthdate->format('Y-m-d');
         $request['user_update_id'] = auth()->user()->id;
         $customers->update($request->input());
         return $this->updated($customers->withData([]));

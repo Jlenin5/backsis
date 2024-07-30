@@ -22,8 +22,6 @@ class CustomerModel extends Model {
         'document_number',
         'email',
         'phone',
-        'birthdate',
-        'gender',
         'status',
         'user_create_id',
         'user_update_id'
