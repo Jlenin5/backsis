@@ -24,7 +24,7 @@ class WarehousesModel extends Model {
         'district_id',
         'province_id',
         'address',
-        'employee_id',
+        'user_id',
         'status',
         'user_create_id',
         'user_update_id'
@@ -52,8 +52,8 @@ class WarehousesModel extends Model {
         return $this->belongsTo(BranchOfficesModel::class);
     }
 
-    public function employee() {
-        return $this->belongsTo(EmployeeModel::class);
+    public function user() {
+        return $this->belongsTo(UsersModel::class);
     }
 
     public function department() {

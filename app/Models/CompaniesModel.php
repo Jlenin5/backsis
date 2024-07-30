@@ -21,7 +21,7 @@ class CompaniesModel extends Model {
         'document_number',
         'email',
         'address',
-        'employee_id',
+        'user_id',
         'web_site',
         'phone',
         'status',
@@ -39,8 +39,8 @@ class CompaniesModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
-    public function employee() {
-        return $this->belongsTo(EmployeeModel::class);
+    public function user() {
+        return $this->belongsTo(UsersModel::class);
     }
 
 }
