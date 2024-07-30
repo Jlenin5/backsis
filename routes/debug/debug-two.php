@@ -405,8 +405,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/warehouse', 'index');
     Route::get('/warehouse/{warehouse}', 'show');
     Route::post('/postwarehouse', 'store');
-    Route::put('/updatewarehouse/{id}', 'update');
-    Route::delete('/deletewarehouse/{id}', 'destroy');
+    Route::put('/updatewarehouse/{warehouse}', 'update');
+    Route::delete('/deletewarehouse/{warehouse}', 'destroy');
     Route::delete('/delwarehousemulti', 'destroyMultiple');
   });
   Route::controller(WorkAreaController::class)->group(function () {

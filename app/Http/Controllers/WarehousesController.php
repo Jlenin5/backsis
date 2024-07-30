@@ -22,6 +22,7 @@ class WarehousesController extends Controller {
 
         return $this->getAll(
             WarehousesModel::search(['name','phone'])
+                ->filters()
                 ->whereNull('deleted_at')
                 ->with(['employee','department','province','district','company','branch_office'])
                 ->offset($offset)
