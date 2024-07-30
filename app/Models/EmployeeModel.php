@@ -29,6 +29,7 @@ class EmployeeModel extends Model {
         'document_number',
         'email',
         'phone',
+        'birthdate',
         'gender',
         'status',
         'user_create_id',
