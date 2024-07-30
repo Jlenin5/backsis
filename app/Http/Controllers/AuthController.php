@@ -55,7 +55,7 @@ class AuthController extends Controller {
     return response()->json([
       'nickname' => Auth::user()->nickname,
       'email' => Auth::user()->email,
-      'avatar' => Auth::user()->employee->avatar,
+      'avatar' => Auth::user()->employee?->avatar ?? '',
       'access_token' => $token,
       'token_type' => 'bearer',
       'expires_in' => Auth::factory()->getTTL() * 60 * 24 * 30,
