@@ -23,7 +23,7 @@ class CompaniesController extends Controller {
         return $this->getAll(
             CompaniesModel::search(['name','phone'])
                 ->whereNull('deleted_at')
-                ->with(['user.employee'])
+                ->with(['employee'])
                 ->offset($offset)
                 ->limit($perPage)
                 ->orderBy('created_at', 'desc')

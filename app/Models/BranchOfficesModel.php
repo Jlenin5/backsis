@@ -22,7 +22,7 @@ class BranchOfficesModel extends Model {
         'province_id',
         'district_id',
         'address',
-        'user_id',
+        'employee_id',
         'status',
         'user_create_id',
         'user_update_id'
@@ -42,8 +42,8 @@ class BranchOfficesModel extends Model {
         return $this->belongsTo(CompaniesModel::class);
     }
 
-    public function user() {
-        return $this->belongsTo(UsersModel::class);
+    public function employee() {
+        return $this->belongsTo(EmployeeModel::class);
     }
 
     public function department() {

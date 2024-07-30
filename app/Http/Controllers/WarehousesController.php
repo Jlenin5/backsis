@@ -24,7 +24,7 @@ class WarehousesController extends Controller {
             WarehousesModel::search(['name','phone'])
                 ->filters()
                 ->whereNull('deleted_at')
-                ->with(['user.employee','department','province','district','company','branch_office'])
+                ->with(['employee','department','province','district','company','branch_office'])
                 ->offset($offset)
                 ->limit($perPage)
                 ->orderBy('created_at', 'desc')

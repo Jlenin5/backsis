@@ -24,7 +24,7 @@ class BranchOfficesController extends Controller {
             BranchOfficesModel::search(['name','phone'])
                 ->filters()
                 ->whereNull('deleted_at')
-                ->withDataAll(['company','user.employee','department','province','district'])
+                ->withDataAll(['company','employee','department','province','district'])
                 ->offset($offset)
                 ->limit($perPage)
                 ->orderBy('created_at', 'desc')
