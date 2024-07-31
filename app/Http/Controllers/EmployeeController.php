@@ -38,6 +38,7 @@ class EmployeeController extends Controller {
     public function store(Store $request) {
         $data = $request->json()->all();
         $birthdate = Carbon::parse($data['birthdate']);
+        $request['birthdate'] = $birthdate->format('Y-m-d');
         $request['user_create_id'] = auth()->user()->id;
         $request['user_update_id'] = auth()->user()->id;
         return $this->stored(

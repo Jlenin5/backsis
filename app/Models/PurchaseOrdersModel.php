@@ -16,19 +16,22 @@ class PurchaseOrdersModel extends Model {
     protected $fillable = [
         'code',
         'description',
-        'supplier_document',
         'company_id',
         'branch_office_id',
         'warehouse_id',
         'supplier_id',
-        'employee_id',
-        'date',
+        'supplier_document',
+        'currency_id',
+        'exchange_rate',
         'discount',
-        'sub_total',
-        'total',
-        'is_approved',
-        'date_approved',
+        'approved',
+        'paid',
         'status',
+        'date_approved',
+        'supplier_document_date',
+        'user_approved_id',
+        'migrate_purchase',
+        'migrate_kardex',
         'user_create_id',
         'user_update_id'
     ];
@@ -63,7 +66,7 @@ class PurchaseOrdersModel extends Model {
         return $this->belongsTo(SuppliersModel::class);
     }
 
-    public function employee() {
-        return $this->belongsTo(EmployeeModel::class);
+    public function currency() {
+        return $this->belongsTo(CurrenciesModel::class);
     }
 }

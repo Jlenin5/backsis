@@ -295,7 +295,7 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(PurchaseOrdersController::class)->group(function () {
     Route::get('/puor', 'index');
-    Route::get('/puor/{id}', 'getId');
+    Route::get('/puor/{purchase_order}', 'show');
     Route::post('/postpuor', 'store');
     Route::put('/updatepuor/{id}', 'update');
     Route::delete('/deletepuor/{id}', 'destroy');
