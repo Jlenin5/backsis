@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PurchaseOrderExcel;
 use App\Http\Requests\PurchaseOrders\Store;
+use App\Http\Requests\PurchaseOrders\Update;
 use App\Models\ProductWarehouseModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Traits\ApiResponser;
@@ -78,18 +79,23 @@ class PurchaseOrdersController extends Controller {
     }
 
     public function show(PurchaseOrdersModel $purchase_order) {
-        return $this->showOne($purchase_order->withData([]));
+        return $this->showOne($purchase_order->withData([
+            'purchase_order_details',
+            'company',
+            'branch_office',
+            'warehouse',
+            'warehouse',
+            'supplier',
+            'currency'
+        ]));
     }
 
     public function store(Store $request) {
-        $data = $request->json()->all();
         $lastCode = PurchaseOrdersModel::orderBy('id', 'desc')->first()->code ?? 'OC-00000';
         $lastNumber = (int)substr($lastCode, 5);
         $newNumber = $lastNumber + 1;
         $newCode = 'OC-' . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
         $request['code'] = $newCode;
-        $supplier_document_date = Carbon::parse($data['supplier_document_date']);
-        $request['supplier_document_date'] = $supplier_document_date->format('Y-m-d');
         $request['user_create_id'] = auth()->user()->id;
         $request['user_update_id'] = auth()->user()->id;
         $save_purchase_order = $this->stored(
@@ -129,74 +135,68 @@ class PurchaseOrdersController extends Controller {
         return $save_purchase_order;
     }
 
-    public function update(Request $request, $id) {
-        $data = $request->json()->all();
-        $date = Carbon::parse($data['date']);
-        $date_approved = Carbon::parse($data['date_approved']);
-        $puor = PurchaseOrdersModel::find($id);
-        $puor->warehouse_id = $data['warehouse_id'];
-        $puor->supplier_id = $data['supplier_id'];
-        $puor->employee_id = $data['employee_id'];
-        $puor->supplier_document = $data['supplier_document'];
-        $puor->date = $date->format('Y-m-d');
-        $puor->discount = $data['discount'];
-        $puor->sub_total = $data['sub_total'];
-        $puor->total = $data['total'];
-        $puor->status = $data['status'];
-        $puor->is_approved = $data['is_approved'];
-        $puor->date_approved = $date_approved->format('Y-m-d');
-        $puor->update();
-        if (isset($data['purchase_order_details']) && is_array($data['purchase_order_details'])) {
-            foreach ($data['purchase_order_details'] as $pod) {
-                $existingDetail = PurchaseOrderDetailsModel::where('Product', $pod['Product'])
-                                                            ->where('PurchaseOrder', $id)
-                                                            ->first();
-                if ($existingDetail) {
-                    $existingDetail->podPrice = $pod['podPrice'];
-                    $existingDetail->podTax = $pod['podTax'];
-                    $existingDetail->podDiscountMethod = $pod['podDiscountMethod'];
-                    $existingDetail->podDiscount = $pod['podDiscount'];
-                    $existingDetail->podQuantity = $pod['podQuantity'];
-                    $existingDetail->podTotal = $pod['podTotal'];
-                    $existingDetail->update();
-                } else {
-                    $newDetail = new PurchaseOrderDetailsModel([
-                        'Product' => $pod['Product'],
-                        'PurchaseOrder' => $id,
-                        'podPrice' => $pod['podPrice'],
-                        'podTax' => $pod['podTax'],
-                        'podDiscountMethod' => $pod['podDiscountMethod'],
-                        'podDiscount' => $pod['podDiscount'],
-                        'podQuantity' => $pod['podQuantity'],
-                        'podTotal' => $pod['podTotal']
-                    ]);
-                    $newDetail->save();
-                }
-            }
+    public function update(Update $request, PurchaseOrdersModel $purchase_order) {
+        if ($request['supplier_document_date']) {
+            $request['supplier_document_date'] = date("Y-m-d", strtotime($request['supplier_document_date']));
         }
-        $currentDetails = PurchaseOrderDetailsModel::where('PurchaseOrder', $id)->pluck('Product');
-        $incomingDetails = collect($data['purchase_order_details'])->pluck('Product');
-        $detailsToDelete = $currentDetails->diff($incomingDetails);
+        $request['user_update_id'] = auth()->user()->id;
+        // $data = $request->json()->all();
+        // $date = Carbon::parse($data['date']);
+        // $date_approved = Carbon::parse($data['date_approved']);
+        // $puor = PurchaseOrdersModel::find($id);
+        // $puor->warehouse_id = $data['warehouse_id'];
+        // $puor->supplier_id = $data['supplier_id'];
+        // $puor->employee_id = $data['employee_id'];
+        // $puor->supplier_document = $data['supplier_document'];
+        // $puor->date = $date->format('Y-m-d');
+        // $puor->discount = $data['discount'];
+        // $puor->sub_total = $data['sub_total'];
+        // $puor->total = $data['total'];
+        // $puor->status = $data['status'];
+        // $puor->is_approved = $data['is_approved'];
+        // $puor->date_approved = $date_approved->format('Y-m-d');
+        // $puor->update();
+        // if (isset($data['purchase_order_details']) && is_array($data['purchase_order_details'])) {
+        //     foreach ($data['purchase_order_details'] as $pod) {
+        //         $existingDetail = PurchaseOrderDetailsModel::where('Product', $pod['Product'])
+        //                                                     ->where('PurchaseOrder', $id)
+        //                                                     ->first();
+        //         if ($existingDetail) {
+        //             $existingDetail->podPrice = $pod['podPrice'];
+        //             $existingDetail->podTax = $pod['podTax'];
+        //             $existingDetail->podDiscountMethod = $pod['podDiscountMethod'];
+        //             $existingDetail->podDiscount = $pod['podDiscount'];
+        //             $existingDetail->podQuantity = $pod['podQuantity'];
+        //             $existingDetail->podTotal = $pod['podTotal'];
+        //             $existingDetail->update();
+        //         } else {
+        //             $newDetail = new PurchaseOrderDetailsModel([
+        //                 'Product' => $pod['Product'],
+        //                 'PurchaseOrder' => $id,
+        //                 'podPrice' => $pod['podPrice'],
+        //                 'podTax' => $pod['podTax'],
+        //                 'podDiscountMethod' => $pod['podDiscountMethod'],
+        //                 'podDiscount' => $pod['podDiscount'],
+        //                 'podQuantity' => $pod['podQuantity'],
+        //                 'podTotal' => $pod['podTotal']
+        //             ]);
+        //             $newDetail->save();
+        //         }
+        //     }
+        // }
+        // $currentDetails = PurchaseOrderDetailsModel::where('PurchaseOrder', $id)->pluck('Product');
+        // $incomingDetails = collect($data['purchase_order_details'])->pluck('Product');
+        // $detailsToDelete = $currentDetails->diff($incomingDetails);
         
-        PurchaseOrderDetailsModel::where('PurchaseOrder', $id)
-                                ->whereIn('Product', $detailsToDelete)
-                                ->delete();
-        return response()->json(['code'=>200,'status'=>'success','message'=>$request->all()]);
+        // PurchaseOrderDetailsModel::where('PurchaseOrder', $id)
+        //                         ->whereIn('Product', $detailsToDelete)
+        //                         ->delete();
+        $purchase_order->update($request->input());
+        return $this->updated($purchase_order->withData([]));
     }
 
-    public function destroy($id) {
-        $puor = PurchaseOrdersModel::find($id);
-        if (!$puor) {
-            return response()->json(['message' => 'Solicitud no encontrada'], 404);
-        }
-        $puor->deleted_at = now();
-        $puor->update();
-        return response()->json(['message' => 'Eliminado correctamente']);
-    }
-
-    public function getMaxId() {
-        $ultimoId = PurchaseOrdersModel::max('id');
-        return response()->json(['ultimo_id' => $ultimoId]);
+    public function destroy(PurchaseOrdersModel $purchase_order) {
+        return ResponseJson::destroy($purchase_order->delete());
     }
 
     public function destroyMultiple(Request $request) {

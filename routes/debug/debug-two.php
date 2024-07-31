@@ -297,8 +297,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/puor', 'index');
     Route::get('/puor/{purchase_order}', 'show');
     Route::post('/postpuor', 'store');
-    Route::put('/updatepuor/{id}', 'update');
-    Route::delete('/deletepuor/{id}', 'destroy');
+    Route::put('/updatepuor/{purchase_order}', 'update');
+    Route::delete('/deletepuor/{purchase_order}', 'destroy');
     Route::get('/puormax', 'getMaxId');
     Route::delete('/delpuormulti', 'destroyMultiple');
     Route::get('/excelpuor', 'exportExcel');
