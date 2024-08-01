@@ -36,9 +36,9 @@ class EmployeeController extends Controller {
     }
 
     public function store(Store $request) {
-        $data = $request->json()->all();
-        $birthdate = Carbon::parse($data['birthdate']);
-        $request['birthdate'] = $birthdate->format('Y-m-d');
+        if ($request['birthdate']) {
+            $request['birthdate'] = date("Y-m-d", strtotime($request['birthdate']));
+        }
         $request['user_create_id'] = auth()->user()->id;
         $request['user_update_id'] = auth()->user()->id;
         return $this->stored(
@@ -47,9 +47,9 @@ class EmployeeController extends Controller {
     }
 
     public function update(Update $request, EmployeeModel $employee) {
-        $data = $request->json()->all();
-        $birthdate = Carbon::parse($data['birthdate']);
-        $request['birthdate'] = $birthdate->format('Y-m-d');
+        if ($request['birthdate']) {
+            $request['birthdate'] = date("Y-m-d", strtotime($request['birthdate']));
+        }
         $request['user_update_id'] = auth()->user()->id;
         $employee->update($request->input());
         return $this->updated($employee->withData([]));
