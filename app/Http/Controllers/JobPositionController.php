@@ -2,71 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseJson;
+use App\Http\Requests\JobPositions\Store;
+use App\Http\Requests\JobPositions\Update;
 use App\Models\JobPositionModel;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponser;
 
 class JobPositionController extends Controller {
+
+    use ApiResponser;
 
     public function index(Request $request) {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+
         $offset = ($page - 1) * $perPage;
-        $jp = JobPositionModel::whereNull('deleted_at')
-            ->offset($offset)
-            ->limit($perPage)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $totalRows = JobPositionModel::whereNull('deleted_at')->count();
 
-        return response()->json([
-            'data' => $jp,
-            'totalRows' => $totalRows
-        ]);
+        return $this->getAll(
+            JobPositionModel::whereNull('deleted_at')
+                ->offset($offset)
+                ->limit($perPage)
+                ->orderBy('created_at', 'desc')
+                ->get(),
+            JobPositionModel::whereNull('deleted_at')->count()
+        );
     }
 
-    public function getId($id) {
-        $jp = JobPositionModel::find($id);
-        if (!$jp) {
-            return response()->json(['message' => 'No hay datos para mostrar'], 404);
-        }
-        return $jp;
+    public function show(JobPositionModel $job_position) {
+        return $this->showOne($job_position->withData([]));
     }
 
-    public function store(Request $request) {
-        $data = $request->json()->all();
-        $jp = new JobPositionModel;
-        $jp->name = $data['name'];
-        $jp->status = $data['status'];
-        $jp->save();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Agregado correctamente']);
+    public function store(Store $request) {
+        $request['user_create_id'] = auth()->user()->id;
+        $request['user_update_id'] = auth()->user()->id;
+        return $this->stored(
+            JobPositionModel::create($request->input())->withData([])
+        );
     }
 
-    public function show(JobPositionModel $jp) {
-        return $jp;
+    public function update(Update $request, JobPositionModel $job_position) {
+        $request['user_update_id'] = auth()->user()->id;
+        $job_position->update($request->input());
+        return $this->updated($job_position->withData([]));
     }
 
-    public function update(Request $request, $id) {
-        $data = $request->json()->all();
-        $jp = JobPositionModel::find($id);
-        $jp->name = $data['name'];
-        $jp->status = $data['status'];
-        $jp->update();
-        return response()->json(['code'=>200,'status'=>'success','message'=>'Actualizado Correctamente']);
-    }
-
-    public function destroy($id) {
-        $jp = JobPositionModel::find($id);
-        if (!$jp) {
-            return response()->json(['message' => 'Solicitud no encontrada'], 404);
-        }
-        $jp->deleted_at = now();
-        $jp->update();
-        return response()->json(['message' => 'Eliminado correctamente']);
-    }
-
-    public function getMaxId() {
-        $ultimoId = JobPositionModel::max('id');
-        return response()->json(['ultimo_id' => $ultimoId]);
+    public function destroy(JobPositionModel $job_position) {
+        return ResponseJson::destroy($job_position->delete());
     }
 
     public function destroyMultiple(Request $request) {

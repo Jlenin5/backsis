@@ -197,11 +197,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(JobPositionController::class)->group(function () {
     Route::get('/jp', 'index');
-    Route::get('/jp/{id}', 'getId');
+    Route::get('/jp/{job_position}', 'show');
     Route::post('/postjp', 'store');
-    Route::put('/updatejp/{id}', 'update');
-    Route::delete('/deletejp/{id}', 'destroy');
-    Route::get('/jpmax', 'getMaxId');
+    Route::put('/updatejp/{job_position}', 'update');
+    Route::delete('/deletejp/{job_position}', 'destroy');
     Route::delete('/deljpmulti', 'destroyMultiple');
   });
   Route::controller(MobilitiesController::class)->group(function () {
