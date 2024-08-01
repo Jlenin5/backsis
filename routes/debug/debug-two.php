@@ -410,11 +410,10 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::controller(WorkAreaController::class)->group(function () {
     Route::get('/wa', 'index');
-    Route::get('/wa/{id}', 'getId');
+    Route::get('/wa/{work_area}', 'show');
     Route::post('/postwa', 'store');
-    Route::put('/updatewa/{id}', 'update');
-    Route::delete('/deletewa/{id}', 'destroy');
-    Route::get('/wamax', 'getMaxId');
+    Route::put('/updatewa/{work_area}', 'update');
+    Route::delete('/deletewa/{work_area}', 'destroy');
     Route::delete('/delwamulti', 'destroyMultiple');
   });
 
