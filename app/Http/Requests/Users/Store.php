@@ -22,10 +22,10 @@ class Store extends FormRequest {
    */
   public function rules() {
     return [
-      'name'      => 'required',
-      'email'     =>  'required|string|email|max:100|unique:users',
-      'password'  =>  'required|string|min:6',
-      'status'    =>  'required|in:1,0'
+      'nickname'      =>  'required|string|max:20',
+      'email'         =>  'required|string|email|max:100|unique:users',
+      'password'      =>  'required|string|min:6',
+      'status'        =>  'required|in:1,0'
     ];
   }
   

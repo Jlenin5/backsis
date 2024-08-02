@@ -21,7 +21,7 @@ class EmployeeController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         return $this->getAll(
-            EmployeeModel::withDataAll(['avatar','work_area','job_position'])
+            EmployeeModel::withDataAll(['avatar','work_area','job_position','user'])
                 ->whereNull('deleted_at')
                 ->offset($offset)
                 ->limit($perPage)

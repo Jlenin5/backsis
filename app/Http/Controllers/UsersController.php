@@ -24,6 +24,7 @@ class UsersController extends Controller {
 
         return $this->getAll(
             UsersModel::withDataAll(['employee','roles'])
+                ->where('deleted_at',null)
                 ->whereNull('deleted_at')
                 ->offset($offset)
                 ->limit($perPage)
@@ -34,12 +35,13 @@ class UsersController extends Controller {
     }
 
     public function store(Store $request) {
-        
         $uuid = Uuid::uuid4();
         $request['uuid'] = $uuid->toString();
-        $request['password'] = bcrypt(($request->password));
+        $request['password'] = bcrypt($request->password);
+        $request['user_create_id'] = auth()->user()->id;
+        $request['user_update_id'] = auth()->user()->id;
         $user = UsersModel::create($request->input());
-        $user->syncRoles($request->role_ids);
+        // $user->syncRoles($request->role_ids);
 
         return $this->stored($user);
     }
@@ -49,6 +51,7 @@ class UsersController extends Controller {
     }
 
     public function update(Update $request, UsersModel $user) {
+        $request['user_create_id'] = auth()->user()->id;
         $request['user_update_id'] = auth()->user()->id;
         $user->update($request->input());
         return $this->updated($user->withData([]));

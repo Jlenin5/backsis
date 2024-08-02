@@ -69,5 +69,9 @@ class EmployeeModel extends Model {
     public function job_position() {
         return $this->belongsTo(JobPositionModel::class);
     }
+
+    public function user() {
+        return $this->hasOne(UsersModel::class, 'employee_id');
+    }
     
 }
