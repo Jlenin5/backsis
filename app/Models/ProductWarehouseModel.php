@@ -30,5 +30,9 @@ class ProductWarehouseModel extends Model {
     public function user_update() {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
+
+    public function warehouse() {
+        return $this->belongsTo(WarehousesModel::class);
+    }
     
 }

@@ -29,18 +29,18 @@ class ProductsController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         return $this->getAll(
-            ProductsModel::with(
-                    'categories',
-                    'images',
-                    'tax',
-                    'unit',
-                    'brand'
-                )
-                ->whereNull('deleted_at')
-                ->offset($offset)
-                ->limit($perPage)
-                ->orderBy('created_at', 'desc')
-                ->get(),
+            ProductsModel::withDataAll([
+                'categories',
+                'images',
+                'tax',
+                'unit',
+                'brand'
+            ])
+            ->whereNull('deleted_at')
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('created_at', 'desc')
+            ->get(),
             ProductsModel::whereNull('deleted_at')->count()
         );
     }

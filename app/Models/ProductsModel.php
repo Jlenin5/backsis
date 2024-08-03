@@ -6,6 +6,7 @@ use App\Traits\BaseModelFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class ProductsModel extends Model {
 
@@ -14,6 +15,7 @@ class ProductsModel extends Model {
     protected $table = 'products';
 
     protected $fillable = [
+        'id',
         'code',
         'featured',
         'name',
@@ -33,6 +35,8 @@ class ProductsModel extends Model {
         'user_create_id',
         'user_update_id'
     ];
+
+    protected $appends = ['stock','booking'];
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
@@ -64,8 +68,284 @@ class ProductsModel extends Model {
         return $this->belongsTo(BrandsModel::class);
     }
 
-    public function warehouses() {
-        // return $this->belongsToMany(WarehousesModel::class, 'product_warehouse', 'product_id', 'warehouse_id')->withPivot('product_id', 'warehouse_id');
+    public function getStockAttribute() {
+        $purchase_order_items = ProductWarehouseModel::select('warehouse_id', DB::raw('sum(quantity) as total'))
+            ->where('product_id', $this->id)
+            // ->whereHas("purchase_orders", function ($query) {
+            //     $query->where('status', '1');
+            //     $query->whereNull('deleted_at');
+            // })
+            // ->whereHas("purchase_order_workshop.purchase_order_workshop_details", function ($query) {
+            //     $query->where('status', 'recibido');
+            //     $query->where('deleted_at', null);
+            // })
+            ->whereHas("warehouse", function ($query) {
+                $query->where('status', '1');
+            })
+            ->groupBy('warehouse_id')->get();
+
+        //warehouse
+        $warehouses = WarehousesModel::where('status', 1)->get();
+        $id = [];
+        $items = [];
+        foreach ($purchase_order_items as $purchase_order_item) {
+            $items[] = $purchase_order_item;
+            $id[] = $purchase_order_item->warehouse_id;
+        }
+        foreach ($warehouses as $warehouse) {
+
+            $wa[] = $warehouse->id;
+
+            $unicos = array_diff($wa, $id);
+        }
+        $a = json_encode($items);
+        $ab = json_decode($a, true);
+        foreach ($unicos as $unico) {
+            array_push($ab, [
+                'warehouse_id' => $unico,
+                'total' => 0
+            ]);
+        }
+        
+        // transfer
+        // $warehouse_transfer_details = WarehouseTransferDetail::where('item_id', $this->id)
+        //     ->whereHas("warehouse_transfer", function ($query) {
+        //         $query->where('accordance', 1);
+        //     })->get();
+        // if($warehouse_transfer_details){
+        //     foreach ($warehouse_transfer_details as $warehouse_transfer_detail) {
+        //         $warehouse_transfer = WarehouseTransfer::where('id', $warehouse_transfer_detail->warehouse_transfer_id)->first();
+        //         foreach ($ab as  $index => $item) {
+        //             $item['total'] = (float)$item['total'];
+        //             if ($item['warehouse_workshop_id'] == $warehouse_transfer->warehouse_origin_id) {
+
+        //                 $item['total'] -= (float)$warehouse_transfer_detail->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+
+        //             if ($item['warehouse_workshop_id']  == $warehouse_transfer->warehouse_destination_id) {
+
+        //                 $item['total'] += (float)$warehouse_transfer_detail->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        // $item_price_workshop_quotations = ItemPriceWorkshopQuotation::where('status', 1)
+        //                                         ->has("workshop_quotation.order_workshop.order_workshop_follows") //ventas
+        //                                         ->whereHas("item_price", function ($query) {
+        //                                             $query->where('item_id', $this->id);
+        //                                         })->get();
+        // if ($item_price_workshop_quotations) {
+        //     foreach ($item_price_workshop_quotations as $item_price_workshop_quotation) {
+        //         foreach ($ab as  $index => $item) {
+        //             $item['total'] = (float)$item['total'];
+        //             if ($item_price_workshop_quotation->warehouse_workshop_id == $item['warehouse_workshop_id']) {
+        //                 $item['total'] -= (float)$item_price_workshop_quotation->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        // $counter_sale_details = CounterSaleDetail::whereHas("item_price", function ($query) {
+        //                                             $query->where('item_id', $this->id);
+        //                                         })
+        //                                         ->whereHas("counter_sale", function ($query) {
+        //                                             $query->where('status', '!=', 'pendiente');
+        //                                         })->get();
+
+        // if ($counter_sale_details) {
+        //     foreach ($counter_sale_details as $counter_sale_detail) {
+        //         foreach ($ab as  $index => $item) {
+        //             $item['total'] = (float)$item['total'];
+        //             if ($counter_sale_detail->counter_sale->warehouse_workshop_id == $item['warehouse_workshop_id']) {
+        //                 $item['total'] -= (float)$counter_sale_detail->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        $items = [];
+        foreach ($ab as  $item) {
+            $items[] = $item;
+        }
+
+        return count($items) ? $items : [];
+    }
+
+    public function getBookingAttribute() {
+        $purchase_order_items = ProductWarehouseModel::select('warehouse_id', DB::raw('sum(quantity) as total'))
+            ->where('product_id', $this->id)
+            // ->whereHas("purchase_order_workshop", function ($query) {
+            //     $query->where('status', '1');
+            //     $query->where('type', 'reposicion');
+            //     $query->where('deleted_at', null);
+            // })
+            // ->whereHas("purchase_order_workshop.purchase_order_workshop_details", function ($query) {
+            //     $query->where('status', 'recibido');
+            //     $query->where('deleted_at', null);
+            // })
+            ->whereHas("warehouse", function ($query) {
+                $query->where('status', '1');
+            })
+            ->groupBy('warehouse_id')->get();
+
+        //warehouse
+        $warehouses = WarehousesModel::where('status', 1)->get();
+        $id = [];
+        $items = [];
+        foreach ($purchase_order_items as $purchase_order_item) {
+            $items[] = $purchase_order_item;
+            $id[] = $purchase_order_item->warehouse_id;
+        }
+        foreach ($warehouses as $warehouse) {
+
+            $wa[] = $warehouse->id;
+
+            $unicos = array_diff($wa, $id);
+        }
+        $a = json_encode($items);
+        $ab = json_decode($a, true);
+        foreach ($unicos as $unico) {
+            array_push($ab, [
+                'warehouse_id' => $unico,
+                'total' => 0
+            ]);
+        }
+
+        // transfer
+        // $warehouse_transfer_details = WarehouseTransferDetail::where('item_id', $this->id)
+        //     ->whereHas("warehouse_transfer", function ($query) {
+        //         $query->where('accordance', 1);
+        //     })->get();
+
+        // if($warehouse_transfer_details){
+        //     foreach ($warehouse_transfer_details as $warehouse_transfer_detail) {
+
+
+        //         $warehouse_transfer = WarehouseTransfer::where('id', $warehouse_transfer_detail->warehouse_transfer_id)->first();
+
+        //         foreach ($ab as  $index => $item) {
+
+        //             $item['total'] = (float)$item['total'];
+        //             if ($item['warehouse_workshop_id'] == $warehouse_transfer->warehouse_origin_id) {
+
+        //                 $item['total'] -= (float)$warehouse_transfer_detail->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+
+        //             if ($item['warehouse_workshop_id']  == $warehouse_transfer->warehouse_destination_id) {
+
+        //                 $item['total'] += (float)$warehouse_transfer_detail->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        $item_price_workshop_quotations = QuotationsModel:://doesntHave("workshop_quotation.order_workshop.order_workshop_follows") //ventas
+                                                                    where('status', 1)
+                                                                    // ->whereHas("item_price", function ($query) {
+                                                                    //     $query->where('item_id', $this->id);
+                                                                    // })
+                                                                    // ->whereHas("workshop_quotation", function ($query) {
+                                                                    //     $query->where('status', 1)->whereNull('deleted_at');
+                                                                    // })
+                                                                    // ->whereHas("workshop_quotation.order_workshop", function ($query) {
+                                                                    //     $query->where('status', 1)->whereNull('deleted_at');
+                                                                    // })
+                                                                    ->get();
+
+        // if ($item_price_workshop_quotations) {
+        //     foreach ($item_price_workshop_quotations as $item_price_workshop_quotation) {
+        //         foreach ($ab as  $index => $item) {
+        //             $item['total'] = (float)$item['total'];
+        //             if ($item_price_workshop_quotation->warehouse_workshop_id == $item['warehouse_workshop_id']) {
+        //                 $item['total'] -= (float)$item_price_workshop_quotation->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        // $counter_sale_details = CounterSaleDetail::whereHas("item_price", function ($query) {
+        //                                                         $query->where('item_id', $this->id);
+        //                                                     })
+        //                                                     // ->whereHas("counter_sale", function ($query) {
+        //                                                     //     $query->where('status', '!=', 'cancelado');
+        //                                                     // })
+        //                                                     ->has('counter_sale')
+        //                                                     ->get();
+
+        // if ($counter_sale_details) {
+        //     foreach ($counter_sale_details as $counter_sale_detail) {
+        //         foreach ($ab as  $index => $item) {
+        //             $item['total'] = (float)$item['total'];
+        //             if ($counter_sale_detail->counter_sale->warehouse_workshop_id == $item['warehouse_workshop_id']) {
+        //                 $item['total'] -= (float)$counter_sale_detail->amount;
+        //                 array_push($ab, [
+        //                     'warehouse_workshop_id' => $item['warehouse_workshop_id'],
+        //                     'total' => (float)$item['total']
+        //                 ]);
+        //                 if ($item['warehouse_workshop_id'] == $item['warehouse_workshop_id']) {
+        //                     unset($ab[$index]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        $items = [];
+        foreach ($ab as  $item) {
+            $items[] = $item;
+        }
+
+        return count($items) ? $items : [];
     }
 
     public function quotes() {
