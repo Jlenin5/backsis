@@ -102,36 +102,42 @@ class PurchaseOrdersController extends Controller {
             PurchaseOrdersModel::create($request->input())->withData([])
         );
         
-        // foreach($data['purchase_order_details'] as $detail) {
-        //     $purchase_order_detail = new PurchaseOrderDetailsModel([
-        //         'product_id' => $detail['product_id'],
-        //         'purchase_order_id' => $puor->id,
-        //         'price' => $detail['sale_price'],
-        //         'quantity' => $detail['quantity'],
-        //         'tax_method' => (bool)$detail['tax_method'],
-        //         'tax_net' => $detail['tax_net'],
-        //         'discount_method' => (bool)$detail['discount_method'],
-        //         'discount' => $detail['discount'],
-        //         'total' => $detail['total']
-        //     ]);
-        //     $purchase_order_detail->save();
+        $last_purchase_order = PurchaseOrdersModel::latest('id')->first();
 
-        //     $product_warehouse = ProductWarehouseModel::whereNull('deleted_at')
-        //                                                 ->where('product_id',$detail['product_id'])
-        //                                                 ->where('warehouse_id',$data['warehouse_id'])
-        //                                                 ->first();
-        //     if ($product_warehouse) {
-        //         $product_warehouse->quantity = $product_warehouse->quantity + $detail['quantity'];
-        //         $product_warehouse->update();
-        //     } else {
-        //         $product_warehouse = new ProductWarehouseModel([
-        //             'product_id' => $detail['product_id'],
-        //             'warehouse_id' => $puor->warehouse_id,
-        //             'quantity' => $detail['quantity']
-        //         ]);
-        //         $product_warehouse->save();
-        //     }
-        // }
+        foreach($request['purchase_order_details'] as $detail) {
+            $purchase_order_detail = new PurchaseOrderDetailsModel([
+                'product_id' => $detail['product_id'],
+                'purchase_order_id' => $last_purchase_order->id,
+                'price' => $detail['sale_price'],
+                'quantity' => $detail['quantity'],
+                'tax_method' => (bool)$detail['tax_method'],
+                'tax_net' => $detail['tax_net'],
+                'discount_method' => (bool)$detail['discount_method'],
+                'discount' => $detail['discount'],
+                'total' => $detail['total'],
+                'user_create_id' => auth()->user()->id,
+                'user_update_id' => auth()->user()->id
+            ]);
+            $purchase_order_detail->save();
+
+            $product_warehouse = ProductWarehouseModel::whereNull('deleted_at')
+                                                        ->where('product_id',$detail['product_id'])
+                                                        ->where('warehouse_id',$request['warehouse_id'])
+                                                        ->first();
+            if ($product_warehouse) {
+                $product_warehouse->quantity = $product_warehouse->quantity + $detail['quantity'];
+                $product_warehouse->update();
+            } else {
+                $product_warehouse = new ProductWarehouseModel([
+                    'product_id' => $detail['product_id'],
+                    'warehouse_id' => $last_purchase_order->warehouse_id,
+                    'quantity' => $detail['quantity'],
+                    'user_create_id' => auth()->user()->id,
+                    'user_update_id' => auth()->user()->id
+                ]);
+                $product_warehouse->save();
+            }
+        }
         return $save_purchase_order;
     }
 
