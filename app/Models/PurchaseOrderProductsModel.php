@@ -20,7 +20,6 @@ class PurchaseOrderProductsModel extends Model {
         'price',
         'tax',
         'quantity',
-        'cost_send',
         'warehouse_id',
         'user_create_id',
         'user_update_id'

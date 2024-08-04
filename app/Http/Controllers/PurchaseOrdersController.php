@@ -13,6 +13,7 @@ use App\Exports\PurchaseOrderExcel;
 use App\Http\Requests\PurchaseOrders\Store;
 use App\Http\Requests\PurchaseOrders\Update;
 use App\Models\ProductWarehouseModel;
+use App\Models\PurchaseOrderProductsModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Traits\ApiResponser;
 
@@ -43,39 +44,6 @@ class PurchaseOrdersController extends Controller {
                 ->get(),
             PurchaseOrdersModel::whereNull('deleted_at')->count()
         );
-        // $searchText = $request->query('search_text');
-        // $query = PurchaseOrdersModel::with(
-        //         'purchase_order_details','warehouses','suppliers','employees'
-        //     )
-        //     ->whereNull('deleted_at');
-
-        // if ($searchText) {
-        //     $query->where(function ($query) use ($searchText) {
-        //         $query->where('code', 'LIKE', "%{$searchText}%")
-        //                 ->orWhereHas('suppliers', function ($query) use ($searchText) {
-        //                     $query->where('name', 'LIKE', "%{$searchText}%");
-        //                 })
-        //                 ->orWhereHas('employees', function ($query) use ($searchText) {
-        //                     $query->where('first_name', 'LIKE', "%{$searchText}%")
-        //                         ->orWhere('second_name', 'LIKE', "%{$searchText}%")
-        //                         ->orWhere('surname', 'LIKE', "%{$searchText}%")
-        //                         ->orWhere('second_surname', 'LIKE', "%{$searchText}%")
-        //                         ->orWhereRaw("CONCAT(first_name, ' ', second_name, ' ', surname, ' ', second_surname) LIKE ?", ["%{$searchText}%"]);
-        //                 });
-        //     });
-        // }
-
-        // $puor = $query->offset($offset)
-        //           ->limit($perPage)
-        //           ->orderBy('created_at', 'desc')
-        //           ->get();
-
-        // $totalRows = PurchaseOrdersModel::whereNull('deleted_at')->count();
-
-        // return response()->json([
-        //     'data' => $puor,
-        //     'totalRows' => $totalRows
-        // ]);
     }
 
     public function show(PurchaseOrdersModel $purchase_order) {
@@ -105,38 +73,35 @@ class PurchaseOrdersController extends Controller {
         $last_purchase_order = PurchaseOrdersModel::latest('id')->first();
 
         foreach($request['purchase_order_details'] as $detail) {
-            $purchase_order_detail = new PurchaseOrderDetailsModel([
-                'product_id' => $detail['product_id'],
+            $purchase_order_detail = new PurchaseOrderProductsModel([
                 'purchase_order_id' => $last_purchase_order->id,
-                'price' => $detail['sale_price'],
+                'product_id' => $detail['product_id'],
+                'price' => $detail['price'],
+                'tax' => $detail['tax'],
                 'quantity' => $detail['quantity'],
-                'tax_method' => (bool)$detail['tax_method'],
-                'tax_net' => $detail['tax_net'],
-                'discount_method' => (bool)$detail['discount_method'],
-                'discount' => $detail['discount'],
-                'total' => $detail['total'],
+                'warehouse_id' => $request['warehouse_id'],
                 'user_create_id' => auth()->user()->id,
                 'user_update_id' => auth()->user()->id
             ]);
             $purchase_order_detail->save();
 
-            $product_warehouse = ProductWarehouseModel::whereNull('deleted_at')
-                                                        ->where('product_id',$detail['product_id'])
-                                                        ->where('warehouse_id',$request['warehouse_id'])
-                                                        ->first();
-            if ($product_warehouse) {
-                $product_warehouse->quantity = $product_warehouse->quantity + $detail['quantity'];
-                $product_warehouse->update();
-            } else {
-                $product_warehouse = new ProductWarehouseModel([
-                    'product_id' => $detail['product_id'],
-                    'warehouse_id' => $last_purchase_order->warehouse_id,
-                    'quantity' => $detail['quantity'],
-                    'user_create_id' => auth()->user()->id,
-                    'user_update_id' => auth()->user()->id
-                ]);
-                $product_warehouse->save();
-            }
+            // $product_warehouse = ProductWarehouseModel::whereNull('deleted_at')
+            //                                             ->where('product_id',$detail['product_id'])
+            //                                             ->where('warehouse_id',$request['warehouse_id'])
+            //                                             ->first();
+            // if ($product_warehouse) {
+            //     $product_warehouse->quantity = $product_warehouse->quantity + $detail['quantity'];
+            //     $product_warehouse->update();
+            // } else {
+            //     $product_warehouse = new ProductWarehouseModel([
+            //         'product_id' => $detail['product_id'],
+            //         'warehouse_id' => $last_purchase_order->warehouse_id,
+            //         'quantity' => $detail['quantity'],
+            //         'user_create_id' => auth()->user()->id,
+            //         'user_update_id' => auth()->user()->id
+            //     ]);
+            //     $product_warehouse->save();
+            // }
         }
         return $save_purchase_order;
     }

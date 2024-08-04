@@ -69,18 +69,18 @@ class ProductsModel extends Model {
     }
 
     public function getStockAttribute() {
-        $purchase_order_items = ProductWarehouseModel::select('warehouse_id', DB::raw('sum(quantity) as total'))
+        $purchase_order_products = PurchaseOrderProductsModel::select('warehouse_id', DB::raw('sum(quantity) as total'))
             ->where('product_id', $this->id)
-            // ->whereHas("purchase_orders", function ($query) {
-            //     $query->where('status', '1');
-            //     $query->whereNull('deleted_at');
-            // })
+            ->whereHas("purchase_order", function ($query) {
+                $query->where('status', 1);
+                $query->whereNull('deleted_at');
+            })
             // ->whereHas("purchase_order_workshop.purchase_order_workshop_details", function ($query) {
             //     $query->where('status', 'recibido');
             //     $query->where('deleted_at', null);
             // })
             ->whereHas("warehouse", function ($query) {
-                $query->where('status', '1');
+                $query->where('status', 1);
             })
             ->groupBy('warehouse_id')->get();
 
@@ -88,14 +88,12 @@ class ProductsModel extends Model {
         $warehouses = WarehousesModel::where('status', 1)->get();
         $id = [];
         $items = [];
-        foreach ($purchase_order_items as $purchase_order_item) {
-            $items[] = $purchase_order_item;
-            $id[] = $purchase_order_item->warehouse_id;
+        foreach ($purchase_order_products as $purchase_order_product) {
+            $items[] = $purchase_order_product;
+            $id[] = $purchase_order_product->warehouse_id;
         }
         foreach ($warehouses as $warehouse) {
-
             $wa[] = $warehouse->id;
-
             $unicos = array_diff($wa, $id);
         }
         $a = json_encode($items);
@@ -201,13 +199,12 @@ class ProductsModel extends Model {
     }
 
     public function getBookingAttribute() {
-        $purchase_order_items = ProductWarehouseModel::select('warehouse_id', DB::raw('sum(quantity) as total'))
+        $purchase_order_products = PurchaseOrderProductsModel::select('warehouse_id', DB::raw('sum(quantity) as total'))
             ->where('product_id', $this->id)
-            // ->whereHas("purchase_order_workshop", function ($query) {
-            //     $query->where('status', '1');
-            //     $query->where('type', 'reposicion');
-            //     $query->where('deleted_at', null);
-            // })
+            ->whereHas("purchase_order", function ($query) {
+                $query->where('status', '1');
+                $query->where('deleted_at', null);
+            })
             // ->whereHas("purchase_order_workshop.purchase_order_workshop_details", function ($query) {
             //     $query->where('status', 'recibido');
             //     $query->where('deleted_at', null);
@@ -221,7 +218,7 @@ class ProductsModel extends Model {
         $warehouses = WarehousesModel::where('status', 1)->get();
         $id = [];
         $items = [];
-        foreach ($purchase_order_items as $purchase_order_item) {
+        foreach ($purchase_order_products as $purchase_order_item) {
             $items[] = $purchase_order_item;
             $id[] = $purchase_order_item->warehouse_id;
         }
