@@ -305,10 +305,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/pdfpuorid/{id}', 'exportPDFId');
   });
   Route::controller(QuotationsController::class)->group(function () {
-    Route::get('/qt', 'index');
-    Route::get('/qt/{id}', 'getId');
-    Route::post('/postqt', 'store');
-    Route::put('/updateqt/{id}', 'update');
+    Route::get('/quotation', 'index');
+    Route::get('/quotation/{quotations}', 'show');
+    Route::post('/post_quotation', 'store');
+    Route::put('/update_quotation/{id}', 'update');
     Route::delete('/deleteqt/{id}', 'destroy');
     Route::get('/qtmax', 'getMaxId');
     Route::delete('/delqtmulti', 'destroyMultiple');

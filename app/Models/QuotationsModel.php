@@ -14,25 +14,21 @@ class QuotationsModel extends Model {
     protected $table = 'quotations';
 
     protected $fillable = [
+        'id',
         'code',
-        'warehouse_id',
+        'description',
         'customer_id',
-        'employee_id',
-        'start_date',
-        'due_date',
-        'discount',
-        'shipping',
-        'tax_rate',
-        'tax_nate',
-        'sub_total',
-        'total',
-        'is_accepted',
+        'currency_id',
+        'exchange_rate',
+        'approved',
+        'user_approved_id',
         'status',
         'user_create_id',
-        'user_update_id'
+        'user_update_id',
+        'created_at'
     ];
 
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['updated_at', 'deleted_at'];
 
     public function user_create() {
         return $this->belongsTo(UsersModel::class, 'user_create_id')->withTrashed();
@@ -42,19 +38,15 @@ class QuotationsModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
-    public function quote_details() {
-        return $this->hasMany(QuoteDetailsModel::class, 'quote_id');
-    }
-
-    public function warehouse() {
-        return $this->belongsTo(WarehousesModel::class);
+    public function product_quotations() {
+        return $this->hasMany(ProductQuotationsModel::class, 'quotation_id');
     }
 
     public function customer() {
         return $this->belongsTo(CustomerModel::class);
     }
 
-    public function employee() {
-        return $this->belongsTo(EmployeeModel::class);
+    public function currency() {
+        return $this->belongsTo(CurrenciesModel::class);
     }
 }
