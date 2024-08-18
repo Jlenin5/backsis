@@ -24,6 +24,7 @@ class QuotationsController extends Controller {
             QuotationsModel::whereNull('deleted_at')
                 ->withDataAll([
                     'product_quotations',
+                    'user_approved.employee',
                     'customer',
                     'currency'
                 ])
@@ -38,6 +39,7 @@ class QuotationsController extends Controller {
     public function show(QuotationsModel $quotations) {
         return $this->showOne($quotations->withData([
             'product_quotations',
+            'user_approved.employee',
             'customer',
             'currency'
         ]));
@@ -60,7 +62,7 @@ class QuotationsController extends Controller {
         foreach($request['product_quotations'] as $item) {
             $product_quotation = new ProductQuotationsModel([
                 'product_name' => $item['product_name'],
-                'product_price' => $item['price'],
+                'product_price' => $item['product_price'],
                 'product_id' => $item['product_id'],
                 'quotation_id' => $last_quote->id,
                 'quantity' => $item['quantity'],

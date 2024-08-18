@@ -38,6 +38,10 @@ class QuotationsModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
+    public function user_approved() {
+        return $this->belongsTo(UsersModel::class, 'user_approved_id');
+    }
+
     public function product_quotations() {
         return $this->hasMany(ProductQuotationsModel::class, 'quotation_id');
     }

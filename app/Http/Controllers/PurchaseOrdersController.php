@@ -72,7 +72,7 @@ class PurchaseOrdersController extends Controller {
         
         $last_purchase_order = PurchaseOrdersModel::latest('id')->first();
 
-        foreach($request['purchase_order_details'] as $detail) {
+        foreach($request['purchase_order_products'] as $detail) {
             $purchase_order_detail = new PurchaseOrderProductsModel([
                 'purchase_order_id' => $last_purchase_order->id,
                 'product_id' => $detail['product_id'],
@@ -127,8 +127,8 @@ class PurchaseOrdersController extends Controller {
         // $puor->is_approved = $data['is_approved'];
         // $puor->date_approved = $date_approved->format('Y-m-d');
         // $puor->update();
-        // if (isset($data['purchase_order_details']) && is_array($data['purchase_order_details'])) {
-        //     foreach ($data['purchase_order_details'] as $pod) {
+        // if (isset($data['purchase_order_products']) && is_array($data['purchase_order_products'])) {
+        //     foreach ($data['purchase_order_products'] as $pod) {
         //         $existingDetail = PurchaseOrderDetailsModel::where('Product', $pod['Product'])
         //                                                     ->where('PurchaseOrder', $id)
         //                                                     ->first();
@@ -156,7 +156,7 @@ class PurchaseOrdersController extends Controller {
         //     }
         // }
         // $currentDetails = PurchaseOrderDetailsModel::where('PurchaseOrder', $id)->pluck('Product');
-        // $incomingDetails = collect($data['purchase_order_details'])->pluck('Product');
+        // $incomingDetails = collect($data['purchase_order_products'])->pluck('Product');
         // $detailsToDelete = $currentDetails->diff($incomingDetails);
         
         // PurchaseOrderDetailsModel::where('PurchaseOrder', $id)
@@ -200,7 +200,7 @@ class PurchaseOrdersController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         $query = PurchaseOrdersModel::with(
-            'purchase_order_details','warehouses','suppliers','employees'
+            'purchase_order_products','warehouses','suppliers','employees'
         )
         ->whereNull('deleted_at');
 
@@ -243,7 +243,7 @@ class PurchaseOrdersController extends Controller {
         $offset = ($page - 1) * $perPage;
 
         $query = PurchaseOrdersModel::with(
-            'purchase_order_details','warehouses','suppliers','employees'
+            'purchase_order_products','warehouses','suppliers','employees'
         )
         ->whereNull('deleted_at');
 
@@ -276,7 +276,7 @@ class PurchaseOrdersController extends Controller {
     }
 
     public function exportPDFId($id) {
-        $purchase_order = PurchaseOrdersModel::with('purchase_order_details','warehouses','suppliers','employees')->where('deleted_at',null)->findOrFail($id);
+        $purchase_order = PurchaseOrdersModel::with('purchase_order_products','warehouses','suppliers','employees')->where('deleted_at',null)->findOrFail($id);
         if (!$purchase_order) {
             return response()->json(['message' => 'No hay datos para mostrar'], 404);
         }
