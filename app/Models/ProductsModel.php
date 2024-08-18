@@ -142,11 +142,11 @@ class ProductsModel extends Model {
         //     }
         // }
 
-        $item_price_workshop_quotations = ProductQuotationsModel::where('status', 1)
-                                                ->has("quotations.product_quotations") //ventas
-                                                ->whereHas("item_price", function ($query) {
-                                                    $query->where('item_id', $this->id);
-                                                })->get();
+        // $item_price_workshop_quotations = ItemPriceWorkshopQuotation::where('status', 1)
+        //                                         ->has("workshop_quotation.order_workshop.order_workshop_follows") //ventas
+        //                                         ->whereHas("item_price", function ($query) {
+        //                                             $query->where('item_id', $this->id);
+        //                                         })->get();
         // if ($item_price_workshop_quotations) {
         //     foreach ($item_price_workshop_quotations as $item_price_workshop_quotation) {
         //         foreach ($ab as  $index => $item) {
