@@ -30,7 +30,7 @@ class PurchaseOrdersController extends Controller {
         return $this->getAll(
             PurchaseOrdersModel::whereNull('deleted_at')
                 ->withDataAll([
-                    'purchase_order_details',
+                    'purchase_order_products',
                     'company',
                     'branch_office',
                     'warehouse',
@@ -48,7 +48,7 @@ class PurchaseOrdersController extends Controller {
 
     public function show(PurchaseOrdersModel $purchase_order) {
         return $this->showOne($purchase_order->withData([
-            'purchase_order_details',
+            'purchase_order_products',
             'company',
             'branch_office',
             'warehouse',

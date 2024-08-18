@@ -46,8 +46,8 @@ class PurchaseOrdersModel extends Model {
         return $this->belongsTo(UsersModel::class, 'user_update_id')->withTrashed();
     }
 
-    public function purchase_order_details() {
-        return $this->hasMany(PurchaseOrderDetailsModel::class, 'purchase_order_id');
+    public function purchase_order_products() {
+        return $this->hasMany(PurchaseOrderProductsModel::class, 'purchase_order_id');
     }
 
     public function company() {
