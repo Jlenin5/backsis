@@ -64,7 +64,7 @@ class QuotationsController extends Controller {
                 'product_id' => $item['product_id'],
                 'quotation_id' => $last_quote->id,
                 'quantity' => $item['quantity'],
-                'discount_method' => $item['discount_type'],
+                'discount_type' => $item['discount_type'],
                 'discount' => $item['discount'],
                 'client_accept' => $item['client_accept'],
                 'total' => $item['total'],

@@ -19,7 +19,7 @@ class ProductQuotationsModel extends Model {
         'product_id',
         'quotation_id',
         'quantity',
-        'discount_method',
+        'discount_type',
         'discount',
         'client_accept',
         'total',
