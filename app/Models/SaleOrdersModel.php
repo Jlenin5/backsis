@@ -51,8 +51,8 @@ class SaleOrdersModel extends Model {
         return $this->belongsTo(WarehousesModel::class);
     }
 
-    public function client() {
-        return $this->belongsTo(ClientsModel::class);
+    public function customer() {
+        return $this->belongsTo(CustomerModel::class);
     }
 
     public function employee() {
